@@ -141,3 +141,30 @@ def logout():
     current_user = None
 
     return redirect("/")
+
+
+@app.route('/post_viewer')
+def post_viewer():
+    global post_list
+
+    value = request.args.get('post')
+    print(value)
+
+    user_post = None
+    
+    for post in post_list:
+        print(post.post)
+        print(value)
+        print("--")
+        if(value == post.post):
+            print("hello")
+            user_post = post
+
+
+    if(user_post == None):
+        return redirect("/")
+
+    print(user_post.post_title)
+
+
+    return render_template("post_viewer.html", current_user = current_user, post = user_post)

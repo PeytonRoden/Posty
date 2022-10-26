@@ -20,28 +20,18 @@
 
 
 
+
 {% block body %}
 
-<div class = "container-sm">
-<h1>Posts</h1>
-<ul>
-    {% for post in post_list %}
 
-    <div class="card mb-3">
-        <img src="..." class="card-img-top" alt="...">
-        <div class="card-body">
-          <h5 class="card-title">{{ post.post_title }}</h5>
-          <p class="card-text"><small class="text-muted">user: {{ post.user.name }}</small></p>
-          <p class="card-text">{{ post.post }}</p>
+<div class="card mb-3">
+    <img src="..." class="card-img-top" alt="...">
+    <div class="card-body">
+      <h5 class="card-title">{{ post.post_title }}</h5>
+      <p class="card-text"><small class="text-muted">user: {{ post.user.name }}</small></p>
+      <p class="card-text">{{ post.post }}</p>
 
-          <!--probalby changes post to post id at some point-->
-          <a href="{{ url_for('post_viewer', post = post.post) }}" class="stretched-link"></a>
-        </div>
-      </div>
-
-    {% endfor %}
-
-</ul>
-</div>
+    </div>
+  </div>
 
 {% endblock %}
