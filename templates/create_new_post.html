@@ -1,0 +1,27 @@
+{% extends '_layout.html' %}
+
+
+{% block currentUser %} {% if current_user != None %}{{current_user.name}} | {{current_user.university}} {% endif %}{% endblock %}
+
+
+{% block body %}
+
+<form action = "/create_new_post" method = "post">
+    <!-- post title input-->
+    <div class="form-outline mb-4">
+      <input name = "title" type="text" id="form4Example2" class="form-control" />
+      <label class="form-label" for="form4Example2">Title</label>
+    </div>
+  
+    <!-- post input -->
+    <div class="form-outline mb-4">
+      <textarea name="post" class="form-control" id="form4Example3" rows="4"></textarea>
+      <label class="form-label" for="form4Example3">post contents</label>
+    </div>
+  
+  
+    <!-- Submit button -->
+    <button type="submit" class="btn btn-primary btn-block mb-4">Send</button>
+  </form>
+
+{% endblock %}

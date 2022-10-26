@@ -1,10 +1,16 @@
 from flask import Flask, render_template, request, url_for, redirect
 from src.repositories.User_repo import get_user_repository
+from src.repositories.Post_repo import get_post_repository
+
 
 app = Flask(__name__) # __name__ refers to the module name
 
 
 user_repo = get_user_repository()
+post_repo = get_post_repository()
+
+global post_list
+post_list = post_repo.get_all_posts()
 
 #login stuff
 global logged_in 
@@ -15,19 +21,29 @@ current_user = None
 
 @app.route('/') # Python decorator, new syntax
 def index():
-    return render_template("index.html", current_user = current_user)
+    return render_template("index.html", current_user = current_user, post_list= post_list)
 
 @app.route('/login_page') # Python decorator, new syntax
 def login_page():
-    return render_template("login_page.html")
+    return render_template("login_page.html", current_user = current_user)
 
 @app.route('/home_page') # Python decorator, new syntax
 def home_page():
-    return render_template("index.html", current_user = current_user)
+    return render_template("index.html", current_user = current_user, post_list= post_list)
 
 @app.route('/sign_up_page') # Python decorator, new syntax
 def sign_up_page():
-    return render_template("sign_up_page.html")
+    return render_template("sign_up_page.html", current_user = current_user)
+
+
+@app.route('/create_new_post_page') # Python decorator, new syntax
+def create_new_post_page():
+
+    if(current_user == None):
+        #need to be logged in to make posts
+        return redirect("/")
+
+    return render_template("create_new_post.html", current_user = current_user)
 
 
 @app.post('/create_new_user') # Python decorator, new syntax
@@ -86,5 +102,28 @@ def login():
 
     print(logged_in)
     print(current_user.name)
+
+    #go back to index, name and uni will appear at top of screen
+    return redirect("/")
+
+
+
+
+@app.post('/create_new_post') # Python decorator, new syntax
+def create_new_post():
+    global post_list
+
+    title = request.form.get('title')
+    post = request.form.get('post')
+
+    print("hi")
+    if(current_user != None):
+        print("hello")
+
+        post_repo.create_post(current_user, current_user.university, title, post)
+        #update post list
+        post_list = post_repo.get_all_posts()
+
+
 
     return redirect("/")

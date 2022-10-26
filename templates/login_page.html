@@ -1,6 +1,6 @@
 {% extends '_layout.html' %}
 
-{% block currentUser %} {{current_user.name}} | {{current_user.university}} {% endblock %}
+{% block currentUser %} {% if current_user != None %}{{current_user.name}} | {{current_user.university}} {% endif %}{% endblock %}
 
 {% block body %}
 
