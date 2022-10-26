@@ -5,23 +5,24 @@
 
 
 {% block body %}
-
+<div class = "container-sm" class = "input-group">
 <form action = "/create_new_post" method = "post">
     <!-- post title input-->
     <div class="form-outline mb-4">
-      <input name = "title" type="text" id="form4Example2" class="form-control" />
       <label class="form-label" for="form4Example2">Title</label>
+      <input name = "title" type="text" id="form4Example2" class="form-control" />
     </div>
   
     <!-- post input -->
     <div class="form-outline mb-4">
-      <textarea name="post" class="form-control" id="form4Example3" rows="4"></textarea>
       <label class="form-label" for="form4Example3">post contents</label>
+      <textarea name="post" class="form-control" id="form4Example3" rows="4"></textarea>
     </div>
   
   
     <!-- Submit button -->
     <button type="submit" class="btn btn-primary btn-block mb-4">Send</button>
   </form>
+  </div>
 
 {% endblock %}

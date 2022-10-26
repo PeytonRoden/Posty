@@ -11,27 +11,21 @@
 <p><a href="{{ url_for('create_new_post_page') }}">create a new post</a></p>
 
 
-<table class="table table-striped">
-    <table class="table table-striped">
-        <tbody>
-            <tr>
-                <td>post title</td>
-                <td>post</td>
-                <td>user</td>
-            </tr>
-        </tbody>
-        <tbody>
-            {% for post in post_list %}
-            <tr>
-                <td>{{ post.post_title }}</td>
-                <td>{{ post.post }}</td>
-                <td>{{ post.user.name }}</td>
-            </tr>
-            {% endfor %}
+<h1>Posts</h1>
+<ul>
+    {% for post in post_list %}
 
-        </tbody>
-    </table>
+    <div class="card mb-3" >
+        <img src="..." class="card-img-top" alt="...">
+        <div class="card-body">
+          <h5 class="card-title">{{ post.post_title }}</h5>
+          <p class="card-text"><small class="text-muted">user: {{ post.user.name }}</small></p>
+          <p class="card-text">{{ post.post }}</p>
+        </div>
+      </div>
 
+    {% endfor %}
 
+</ul>
 
 {% endblock %}
