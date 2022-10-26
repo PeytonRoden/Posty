@@ -1,0 +1,39 @@
+{% extends '_layout.html' %}
+
+<!--if user isn't logged in then they get option to login, if logged in they can post-->
+{% block login_or_post %}
+{% if current_user == None %}<a class="nav-link" href="{{ url_for('login_page') }}">Login</a>
+{% else %}   
+<a class="nav-link" href="{{ url_for('create_new_post_page') }}">Post</a>
+{% endif %} {% endblock %}
+
+<!--if they are logged in display their name and univeristy, also make it clicckable so they can edit their stuff-->
+{% block currentUser %} 
+{% if current_user != None %} 
+<a class="nav-link active" href = "{{ url_for('account_info_page') }}"> 
+{{current_user.name}} | {{current_user.university}} 
+</a>
+{% else %}
+<a class="nav-link inactive"> </a>
+{% endif %}
+{% endblock %}
+
+
+
+
+{% block body %}
+
+<p>this is the account info page</p>
+<p>accoutn info can go here</p>
+
+
+<div class = "container-sm" class = "input-group">
+<form action = "/account_info/logout" method = "post">
+
+  
+    <!-- logout button -->
+    <button type="submit" class="btn btn-primary btn-block mb-4">Logout</button>
+  </form>
+  </div>
+
+{% endblock %}

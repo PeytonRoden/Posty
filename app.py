@@ -35,6 +35,10 @@ def home_page():
 def sign_up_page():
     return render_template("sign_up_page.html", current_user = current_user)
 
+@app.route('/account_info_page') # Python decorator, new syntax
+def account_info_page():
+    return render_template("account_info.html", current_user = current_user)
+
 
 @app.route('/create_new_post_page') # Python decorator, new syntax
 def create_new_post_page():
@@ -125,5 +129,15 @@ def create_new_post():
         post_list = post_repo.get_all_posts()
 
 
+
+    return redirect("/")
+
+
+
+@app.post('/account_info/logout') # Python decorator, new syntax
+def logout():
+    global current_user
+
+    current_user = None
 
     return redirect("/")
