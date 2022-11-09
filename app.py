@@ -1,6 +1,4 @@
 from flask import Flask, render_template, request, url_for, redirect
-from src.repositories.User_repo import get_user_repository
-from src.repositories.Post_repo import get_post_repository
 
 
 from src.repositories.Post_Repository import post_repository_singleton
@@ -17,10 +15,6 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db.init_app(app)
 
-
-
-#user_repo = get_user_repository()
-#post_repo = get_post_repository()
 
 global post_list
 post_list = post_repository_singleton.get_all_posts()
