@@ -3,14 +3,27 @@ from src.repositories.User_repo import get_user_repository
 from src.repositories.Post_repo import get_post_repository
 
 
+from src.repositories.Post_Repository import post_repository_singleton
+from src.repositories.User_Repository import user_repository_singleton
+from src.repositories.Comment_Repository import comment_repository_singleton
+
+from src.models.models import db
+
 app = Flask(__name__) # __name__ refers to the module name
+app.app_context().push()
+
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:henry123@localhost:5432/posty_database'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+db.init_app(app)
 
 
-user_repo = get_user_repository()
-post_repo = get_post_repository()
+
+#user_repo = get_user_repository()
+#post_repo = get_post_repository()
 
 global post_list
-post_list = post_repo.get_all_posts()
+post_list = post_repository_singleton.get_all_posts()
 
 #login stuff
 global logged_in 
@@ -21,6 +34,7 @@ current_user = None
 
 @app.route('/') # Python decorator, new syntax
 def index():
+    post_list = post_repository_singleton.get_all_posts()
     return render_template("index.html", current_user = current_user, post_list= post_list)
 
 @app.route('/login_page') # Python decorator, new syntax
@@ -53,7 +67,9 @@ def create_new_post_page():
 @app.post('/create_new_user') # Python decorator, new syntax
 def create_new_user():
 
-    user_name = request.form.get('name')
+    firstname = request.form.get('firstname')
+    lastname = request.form.get('lastname')
+    username = request.form.get('username')
     user_university = request.form.get('university')
     user_email = request.form.get('email')
     user_password = request.form.get('password')
@@ -63,9 +79,9 @@ def create_new_user():
         #TODO: handle this
         return redirect("/sign_up_page")
 
-    user_repo.create_user(user_name, user_email,user_password,user_university)
+    user_repository_singleton.create_user(firstname, lastname, username, user_email,user_password,user_university)
 
-    print(user_repo.get_user_by_name(user_name).name)
+    print(user_repository_singleton.get_user_by_username(username).name)
 
 
     return redirect("/login_page")
@@ -78,18 +94,18 @@ def login():
     global current_user
 
 
-    user_email = request.form.get('email')
+    username = request.form.get('username')
     user_password = request.form.get('password')
 
 
-    user = user_repo.get_user_by_email(user_email)
+    user = user_repository_singleton.get_user_by_username(username)
 
     if(user == None):
         #user doesn't exist
         print("user  === none")
         return redirect("/login_page")
 
-    if(user.password != user_password):
+    if(user.user_password != user_password):
         #passwords don't match
         print("passwrods don't match")
         return redirect("/login_page")
@@ -105,7 +121,7 @@ def login():
     current_user = user
 
     print(logged_in)
-    print(current_user.name)
+    print(current_user.username)
 
     #go back to index, name and uni will appear at top of screen
     return redirect("/")
@@ -118,13 +134,13 @@ def create_new_post():
     global post_list
 
     title = request.form.get('title')
-    post = request.form.get('post')
+    post_text = request.form.get('post')
 
     if(current_user != None):
 
-        post_repo.create_post(current_user, current_user.university, title, post)
+        post_repository_singleton.create_post(current_user.university, title, post_text, current_user.user_id)
         #update post list
-        post_list = post_repo.get_all_posts()
+        post_list = post_repository_singleton.get_all_posts()
 
 
 

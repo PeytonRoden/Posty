@@ -1,5 +1,5 @@
-from src.models import db
-from src.models import Repost
+from src.models.models import db
+from src.models.models import Repost
 
 class Repost_Repository:
 

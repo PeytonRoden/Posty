@@ -10,7 +10,7 @@
 <!--if they are logged in display their name and univeristy, also make it clicckable so they can edit their stuff-->
 {% block currentUser %} 
 <a class="nav-link active" href = "{% if current_user != None %}  {{ url_for('account_info_page') }}  {% endif %}"> 
-{% if current_user != None %}{{current_user.name}} | {{current_user.university}} 
+{% if current_user != None %}{{current_user.username}} | {{current_user.university}} 
 </a>
 {% endif %}{% endblock %}
 

@@ -1,6 +1,4 @@
 from src.models.User import User
-from src.models.Comment_Tree import Comment_Tree
-
 
 class Post:
     """Holds, name, email, password, and university name"""
@@ -13,13 +11,3 @@ class Post:
         self.post = post
         self.postID = postID
         self.__addCommentTree()
-
-    def __addCommentTree(self)->None:
-        self.comment_tree = Comment_Tree()
-
-    def addBaseComment(self, comment):
-        self.comment_tree.add_base_comment(comment)
-
-    def getCommentTree(self) -> Comment_Tree:
-        return self.comment_tree
-

@@ -1,5 +1,5 @@
-from src.models import db
-from src.models import Comment
+from src.models.models import db
+from src.models.models import Comment
 
 class Comment_Repository:
 

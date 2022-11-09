@@ -1,5 +1,5 @@
-from src.models import db
-from src.models import Like_
+from src.models.models import db
+from src.models.models import Like_
 
 class Like_Repository:
 
