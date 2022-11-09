@@ -120,9 +120,7 @@ def create_new_post():
     title = request.form.get('title')
     post = request.form.get('post')
 
-    print("hi")
     if(current_user != None):
-        print("hello")
 
         post_repo.create_post(current_user, current_user.university, title, post)
         #update post list
@@ -147,17 +145,16 @@ def logout():
 def post_viewer():
     global post_list
 
-    value = request.args.get('post')
+    value = request.args.get('postID')
     print(value)
 
+
+    #need to add post id's to each post and grab them using post ids
     user_post = None
     
     for post in post_list:
-        print(post.post)
-        print(value)
         print("--")
-        if(value == post.post):
-            print("hello")
+        if(value == post.postID):
             user_post = post
 
 
