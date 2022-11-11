@@ -155,23 +155,49 @@ def logout():
 def post_viewer():
     global post_list
 
-    value = request.args.get('postID')
-    print(value)
+    selected_post_id = request.args.get('post_id')
 
 
-    #need to add post id's to each post and grab them using post ids
+    #grabbing posts using post ids
     user_post = None
     
     for post in post_list:
-        print("--")
-        if(value == post.postID):
+        if(str(selected_post_id ) == str(post.post_id)):
             user_post = post
 
 
     if(user_post == None):
         return redirect("/")
 
-    print(user_post.post_title)
 
 
-    return render_template("post_viewer.html", current_user = current_user, post = user_post)
+    #need to find list of all comments associated with this particular post and pass that into render tempate
+    comments = post_repository_singleton.returnAllComments(selected_post_id )
+    print(comments)
+
+
+    #if the comments list is empty display the page
+    if(len(comments) == 0):
+        return render_template("post_viewer.html", current_user = current_user, post = user_post)
+
+
+
+    #organize comments list into a dictionary where
+    # {  parents comment: [child comment 1, child comment 2, child comment 3]   }
+
+    comment_dictionary = {}
+
+    #parent comments
+    for comment in comments:
+        if comment.parent_comment_id == None:
+            comment_dictionary[comment] = []
+
+    #child comments
+    for comment in comment_dictionary:
+        if comment.parent_comment_id != None:
+            comment_dictionary[comment_repository_singleton.get_comment_by_id(comment.parent_comment_id)] = comment
+
+    print(comment_dictionary)
+
+
+    return render_template("post_viewer.html", current_user = current_user, post = user_post, comment_dictionary = comment_dictionary)

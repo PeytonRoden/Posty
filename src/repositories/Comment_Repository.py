@@ -9,7 +9,9 @@ class Comment_Repository:
 
     def get_comment_by_id(self, comment_id):
         # TODO get a single comment from the DB using the ID
-        return None
+        comment = Comment.query.get(comment_id)
+
+        return comment
 
     def get_comments_by_post_id(self, post_id):
         # TODO get all comments on post using post_id

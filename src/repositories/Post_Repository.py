@@ -1,5 +1,6 @@
 from src.models.models import db
 from src.models.models import Post
+from src.models.models import Comment
 
 class Post_Repository:
 
@@ -16,12 +17,20 @@ class Post_Repository:
         new_post = Post(university = university, post_title = post_title, post_text = post_text, user_id=user_id)
         db.session.add(new_post)
         db.session.commit()
-        
+
         return None
 
     def search_posts(self, title):
         # TODO get all Users matching case insensitive substring (SQL LIKE, use google for how to do with SQLAlchemy)
         return None
+
+
+    def returnAllComments(self, post_id):
+        #TODO return all comments assoicated witht that post ID
+
+        comments = Comment.query.filter_by(post_id = post_id).all()
+
+        return comments
 
 
 # Singleton to be used in other modules

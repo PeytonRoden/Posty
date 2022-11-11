@@ -35,7 +35,7 @@
           <p class="card-text">{{ post.post_text }}</p>
 
           <!--probalby changes post to post id at some point-->
-          <a href="{{ url_for('post_viewer', postID = post.postID) }}" class="stretched-link"></a>
+          <a href="{{ url_for('post_viewer', post_id = post.post_id) }}" class="stretched-link"></a>
         </div>
       </div>
 
