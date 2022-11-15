@@ -21,7 +21,16 @@ class Comment_Repository:
         # TODO get all comments from user using user_id
         return None
 
-    def create_comment(self, title, director, rating):
+    def create_parent_comment(self, comment_text, post_id, user_id):
+        # TODO create a new parent comment in the DB
+
+        new_comment = Comment(comment_text = comment_text, post_id= post_id, user_id = user_id)
+        db.session.add(new_comment)
+        db.session.commit()
+
+        return new_comment
+
+    def create_child_comment(self, comment_text, post_id, user_id, parent_comment_id):
         # TODO create a new User in the DB
 
         return None

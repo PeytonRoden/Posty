@@ -18,7 +18,7 @@ class Post_Repository:
         db.session.add(new_post)
         db.session.commit()
 
-        return None
+        return new_post
 
     def search_posts(self, title):
         # TODO get all Users matching case insensitive substring (SQL LIKE, use google for how to do with SQLAlchemy)

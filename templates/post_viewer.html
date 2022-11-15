@@ -33,7 +33,7 @@
           <div class="card-body">
             <div class="d-flex flex-start align-items-center">
               <img class="rounded-circle shadow-1-strong me-3"
-                src="https://mdbcdn.b-cdn.net/img/Photos/Avatars/img%20(19).webp" alt="avatar" width="60"
+                src="{{ url_for('static', filename='default_avatar.jpg') }}" alt="avatar" width="60"
                 height="60" />
               <div>
                 <h6 class="fw-bold text-primary mb-1">{{ post.user.username }} | {{ post.user.university }}</h6>
@@ -56,7 +56,7 @@
                 <i class="far fa-thumbs-up me-2"></i>
                 <p class="mb-0">Like</p>
               </a>
-              <a href="#!" class="d-flex align-items-center me-3">
+              <a href="/comment_text_area/{{ post.post_id }}" class="d-flex align-items-center me-3">
                 <i class="far fa-comment-dots me-2"></i>
                 <p class="mb-0">Comment</p>
               </a>
@@ -66,21 +66,32 @@
               </a>
             </div>
           </div>
-          {% if comment %}
+          {% if parent_comment %}
           <div class="card-footer py-3 border-0" style="background-color: #f8f9fa;">
             <div class="d-flex flex-start w-100">
               <img class="rounded-circle shadow-1-strong me-3"
-                src="https://mdbcdn.b-cdn.net/img/Photos/Avatars/img%20(19).webp" alt="avatar" width="40"
+                src="{{ url_for('static', filename='default_avatar.jpg') }}" alt="avatar" width="40"
                 height="40" />
               <div class="form-outline w-100">
-                <textarea class="form-control" id="textAreaExample" rows="4"
+
+
+                <form  action="/comment_text_area/comment/{{ post.post_id }}">
+
+
+                <textarea name = "comment_text" class="form-control" id="textAreaExample" rows="4"
                   style="background: #fff;"></textarea>
                 <label class="form-label" for="textAreaExample">Message</label>
               </div>
             </div>
             <div class="float-end mt-2 pt-1">
-              <button type="button" class="btn btn-primary btn-sm">Post comment</button>
-              <button type="button" class="btn btn-outline-primary btn-sm">Cancel</button>
+
+              
+              <button type="submit" value ="post_comment" name="post_comment"  class="btn btn-primary btn-sm">Post comment</button>
+              </form>
+
+              <form  action="/post_viewer/{{ post.post_id }}">
+              <button type="submit" value ="cancel_comment" name="cancel_comment"  class="btn btn-outline-primary btn-sm">Cancel</button>
+              </form>
             </div>
           </div>
           {% endif %}
@@ -93,59 +104,46 @@
 
   <!--example comment tree ot be changed later-->
 
+
   <section class="gradient-custom">
     <div class="container my-5 py-5">
       <div class="row d-flex justify-content-center">
         <div class="col-md-12 col-lg-10 col-xl-8">
           <div class="card">
             <div class="card-body p-4">
-              <h4 class="text-center mb-4 pb-2">Nested comments section</h4>
+              <h4 class="text-center mb-4 pb-2">Comments</h4>
   
               <div class="row">
                 <div class="col">
+
+
+                  {% for parent_comment, children_comments in comment_dictionary.items() %}
+
                   <div class="d-flex flex-start">
                     <img class="rounded-circle shadow-1-strong me-3"
-                      src="https://mdbcdn.b-cdn.net/img/Photos/Avatars/img%20(10).webp" alt="avatar" width="65"
+                      src="{{ url_for('static', filename='default_avatar.jpg') }}"alt="avatar" width="65"
                       height="65" />
                     <div class="flex-grow-1 flex-shrink-1">
                       <div>
                         <div class="d-flex justify-content-between align-items-center">
                           <p class="mb-1">
-                            Maria Smantha <span class="small">- 2 hours ago</span>
+                            {{ parent_comment.user.username }} <span class="small"> - {{ parent_comment.comment_datetime.strftime("%Y-%m-%d %H:%M") }}</span>
                           </p>
                           <a href="#!"><i class="fas fa-reply fa-xs"></i><span class="small"> reply</span></a>
                         </div>
                         <p class="small mb-0">
-                          It is a long established fact that a reader will be distracted by
-                          the readable content of a page.
+                          {{ parent_comment.comment_text }}
                         </p>
                       </div>
   
+                      
+                      {% for child_comment in children_comments %}
+
+
                       <div class="d-flex flex-start mt-4">
                         <a class="me-3" href="#">
                           <img class="rounded-circle shadow-1-strong"
-                            src="https://mdbcdn.b-cdn.net/img/Photos/Avatars/img%20(11).webp" alt="avatar"
-                            width="65" height="65" />
-                        </a>
-                        <div class="flex-grow-1 flex-shrink-1">
-                          <div>
-                            <div class="d-flex justify-content-between align-items-center">
-                              <p class="mb-1">
-                                Simona Disa <span class="small">- 3 hours ago</span>
-                              </p>
-                            </div>
-                            <p class="small mb-0">
-                              letters, as opposed to using 'Content here, content here',
-                              making it look like readable English.
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-  
-                      <div class="d-flex flex-start mt-4">
-                        <a class="me-3" href="#">
-                          <img class="rounded-circle shadow-1-strong"
-                            src="https://mdbcdn.b-cdn.net/img/Photos/Avatars/img%20(32).webp" alt="avatar"
+                            src="{{ url_for('static', filename='default_avatar.jpg') }}" alt="avatar"
                             width="65" height="65" />
                         </a>
                         <div class="flex-grow-1 flex-shrink-1">
@@ -156,14 +154,20 @@
                               </p>
                             </div>
                             <p class="small mb-0">
-                              the majority have suffered alteration in some form, by
-                              injected humour, or randomised words.
+                              child commment
                             </p>
                           </div>
                         </div>
                       </div>
+
+                      {% endfor %}
+                  
                     </div>
+                    
                   </div>
+  
+                  {% endfor %}
+
                 </div>
               </div>
             </div>
@@ -172,7 +176,6 @@
       </div>
     </div>
   </section>
-
 
 
 {% endblock %}

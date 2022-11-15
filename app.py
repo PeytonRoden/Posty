@@ -178,12 +178,83 @@ def post_viewer(post_id):
 
     #if the comments list is empty display the page
     if(len(comments) == 0):
-        return render_template("post_viewer.html", current_user = current_user, post = user_post)
+        return render_template("post_viewer.html", current_user = current_user, post = user_post, comment_dictionary = {})
 
 
 
     #organize comments list into a dictionary where
     # {  parents comment: [child comment 1, child comment 2, child comment 3]   }
+
+    comment_dictionary = generate_comment_dictionary(post_id)
+
+    print(comment_dictionary)
+
+    return render_template("post_viewer.html", current_user = current_user, post = user_post, comment_dictionary = comment_dictionary, parent_comment= False)
+
+
+@app.route('/comment_text_area/<int:post_id>')
+def post_viewer_comment_text_area(post_id):
+
+    #get post object using id
+    user_post = post_repository_singleton.get_post_by_id(post_id)
+
+    #get comment dictionary
+    comment_dictionary = generate_comment_dictionary(post_id)
+
+    #can't comment if not logged in
+    if(not logged_in):
+        #if the comments list is empty display the page
+        if(len(comment_dictionary) == 0):
+            return render_template("post_viewer.html", current_user = current_user, post = user_post, comment_dictionary = {}, parent_comment=False)
+
+        return render_template("post_viewer.html", current_user = current_user, post = user_post, comment_dictionary = comment_dictionary, parent_comment= False)
+
+    #if the comments list is empty display the page
+    if(len(comment_dictionary) == 0):
+        return render_template("post_viewer.html", current_user = current_user, post = user_post, comment_dictionary = {}, parent_comment=True)
+
+    return render_template("post_viewer.html", current_user = current_user, post = user_post, comment_dictionary = comment_dictionary, parent_comment= True)
+    
+
+@app.route('/comment_text_area/comment/<int:post_id>')
+def post_viewer_comment(post_id):
+
+    comment_dictionary = generate_comment_dictionary(post_id)
+    user_post = post_repository_singleton.get_post_by_id(post_id)
+
+    #can't comment if not logged in
+    if(not logged_in):
+        #if the comments list is empty display the page
+        if(len(comment_dictionary) == 0):
+            return render_template("post_viewer.html", current_user = current_user, post = user_post, comment_dictionary = {}, parent_comment=False)
+
+        return render_template("post_viewer.html", current_user = current_user, post = user_post, comment_dictionary = comment_dictionary, parent_comment= False)
+
+
+    comment_text = request.args.get('comment_text')
+
+    comment_repository_singleton.create_parent_comment(comment_text, post_id , current_user.user_id)
+    comment_dictionary = generate_comment_dictionary(post_id)
+
+    #if the comments list is empty display the page
+    if(len(comment_dictionary) == 0):
+        return render_template("post_viewer.html", current_user = current_user, post = user_post, comment_dictionary = {}, parent_comment=False)
+
+    return render_template("post_viewer.html", current_user = current_user, post = user_post, comment_dictionary = comment_dictionary, parent_comment= False)
+    
+
+
+@app.route('/comment_text_area/<int:post_id>/<int:comment_id>')
+def post_viewer_reply_to_comment():
+    pass
+    #return render_template("post_viewer.html", current_user = current_user, post = user_post, comment_dictionary = comment_dictionary)
+
+
+def generate_comment_dictionary(selected_post_id):
+    #organize comments list into a dictionary where
+    # {  parents comment: [child comment 1, child comment 2, child comment 3]   }
+
+    comments = post_repository_singleton.returnAllComments(selected_post_id )
 
     comment_dictionary = {}
 
@@ -197,17 +268,4 @@ def post_viewer(post_id):
         if comment.parent_comment_id != None:
             comment_dictionary[comment_repository_singleton.get_comment_by_id(comment.parent_comment_id)] = comment
 
-    print(comment_dictionary)
-
-
-    return render_template("post_viewer.html", current_user = current_user, post = user_post, comment_dictionary = comment_dictionary, comment= False)
-
-
-@app.route('/post_viewer/comment/<int:post_id>')
-def post_viewer_comment():
-    pass
-
-@app.route('/post_viewer/comment/<int:post_id>/<int:comment_id>')
-def post_viewer_reply_to_comment():
-    pass
-    #return render_template("post_viewer.html", current_user = current_user, post = user_post, comment_dictionary = comment_dictionary)
+    return comment_dictionary

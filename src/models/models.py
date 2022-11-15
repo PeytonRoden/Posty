@@ -55,7 +55,7 @@ class Comment(db.Model):
     post_id = db.Column(db.Integer, db.ForeignKey(Post.post_id), nullable=False)
     post = db.relationship('Post', backref='post_comments', lazy=True, primaryjoin="Comment.post_id == Post.post_id")
     user_id = db.Column(db.Integer, db.ForeignKey(User_.user_id), nullable=False)
-    user = db.relationship('User_', backref='user_comments', lazy=True, primaryjoin="User_.user_id == Comment.user_id")
+    user = db.relationship('User_', backref='commenter', lazy=True, primaryjoin="User_.user_id == Comment.user_id")
 
 
 
