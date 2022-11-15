@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, url_for, redirect
+from flask import Flask, render_template, request, url_for, redirect, flash
 
 
 from src.repositories.Post_Repository import post_repository_singleton
@@ -8,6 +8,8 @@ from src.repositories.Comment_Repository import comment_repository_singleton
 from src.models.models import db
 
 app = Flask(__name__) # __name__ refers to the module name
+app.secret_key = 'super secret key'
+app.config['SESSION_TYPE'] = 'filesystem'
 app.app_context().push()
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:password@localhost:5432/posty_database'
@@ -58,7 +60,7 @@ def create_new_post_page():
     return render_template("create_new_post.html", current_user = current_user)
 
 
-@app.post('/create_new_user') # Python decorator, new syntax
+@app.post('/create_new_user')  # Python decorator, new syntax
 def create_new_user():
 
     firstname = request.form.get('firstname')
@@ -69,14 +71,15 @@ def create_new_user():
     user_password = request.form.get('password')
     user_repeat_password = request.form.get('repeat_password')
 
-    if(user_password != user_repeat_password):
-        #TODO: handle this
+    if (user_password != user_repeat_password):
+        # TODO: handle this
+        flash('Password Does Not Match')
         return redirect("/sign_up_page")
 
-    user_repository_singleton.create_user(firstname, lastname, username, user_email,user_password,user_university)
+    user_repository_singleton.create_user(
+        firstname, lastname, username, user_email, user_password, user_university)
 
-    print(user_repository_singleton.get_user_by_username(username).name)
-
+    flash('Form Submitted Successfully')
 
     return redirect("/login_page")
 
