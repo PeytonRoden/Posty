@@ -4,13 +4,14 @@ from flask import Flask, render_template, request, url_for, redirect
 from src.repositories.Post_Repository import post_repository_singleton
 from src.repositories.User_Repository import user_repository_singleton
 from src.repositories.Comment_Repository import comment_repository_singleton
+from src.models.models import Post
 
 from src.models.models import db
 
 app = Flask(__name__) # __name__ refers to the module name
 app.app_context().push()
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:password@localhost:5432/posty_database'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:henry123@localhost:5432/posty_database'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db.init_app(app)
@@ -151,12 +152,11 @@ def logout():
     return redirect("/")
 
 
-@app.route('/post_viewer')
-def post_viewer():
+@app.route('/post_viewer/<int:post_id>')
+def post_viewer(post_id):
     global post_list
 
-    selected_post_id = request.args.get('post_id')
-
+    selected_post_id = post_id
 
     #grabbing posts using post ids
     user_post = None
@@ -200,4 +200,14 @@ def post_viewer():
     print(comment_dictionary)
 
 
-    return render_template("post_viewer.html", current_user = current_user, post = user_post, comment_dictionary = comment_dictionary)
+    return render_template("post_viewer.html", current_user = current_user, post = user_post, comment_dictionary = comment_dictionary, comment= False)
+
+
+@app.route('/post_viewer/comment/<int:post_id>')
+def post_viewer_comment():
+    pass
+
+@app.route('/post_viewer/comment/<int:post_id>/<int:comment_id>')
+def post_viewer_reply_to_comment():
+    pass
+    #return render_template("post_viewer.html", current_user = current_user, post = user_post, comment_dictionary = comment_dictionary)
