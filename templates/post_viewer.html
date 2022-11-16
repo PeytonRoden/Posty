@@ -129,14 +129,52 @@
                           <p class="mb-1">
                             {{ parent_comment.user.username }} <span class="small"> - {{ parent_comment.comment_datetime.strftime("%Y-%m-%d %H:%M") }}</span>
                           </p>
-                          <a href="#!"><i class="fas fa-reply fa-xs"></i><span class="small"> reply</span></a>
+                          <a href="/comment_text_area/{{ post.post_id }}/{{ parent_comment.comment_id }}"><i class="fas fa-reply fa-xs"></i><span class="small"> reply</span></a>
                         </div>
                         <p class="small mb-0">
                           {{ parent_comment.comment_text }}
                         </p>
                       </div>
-  
+
+
+                      <!--For making child commments-->
+                      {% if comment_to_reply %}
+                      {% if comment_to_reply.comment_id == parent_comment.comment_id %}
+                        
                       
+                      <div class="card-footer py-3 border-0" style="background-color: #f8f9fa;">
+                        <div class="d-flex flex-start w-100">
+                          <img class="rounded-circle shadow-1-strong me-3"
+                            src="{{ url_for('static', filename='default_avatar.jpg') }}" alt="avatar" width="20"
+                            height="20" />
+                          <div class="form-outline w-100">
+            
+            
+                            <form  action="/comment_text_area/comment/{{ post.post_id }}/{{ parent_comment.comment_id }}">
+            
+            
+                            <textarea name = "comment_text" class="form-control" id="textAreaExample" rows="4"
+                              style="background: #fff;"></textarea>
+                            <label class="form-label" for="textAreaExample">Message</label>
+                          </div>
+                        </div>
+                        <div class="float-end mt-2 pt-1">
+            
+                          
+                          <button type="submit" value ="post_comment" name="post_comment"  class="btn btn-primary btn-sm">Post comment</button>
+                          </form>
+            
+                          <form  action="/post_viewer/{{ post.post_id }}">
+                          <button type="submit" value ="cancel_comment" name="cancel_comment"  class="btn btn-outline-primary btn-sm">Cancel</button>
+                          </form>
+                        </div>
+                      </div>
+
+
+                      {% endif %}
+                      {% endif %}
+
+                      {% if children_comments is iterable %}
                       {% for child_comment in children_comments %}
 
 
@@ -150,17 +188,18 @@
                           <div>
                             <div class="d-flex justify-content-between align-items-center">
                               <p class="mb-1">
-                                John Smith <span class="small">- 4 hours ago</span>
+                                {{ child_comment.user.username }}<span class="small">- {{ child_comment.comment_datetime.strftime("%Y-%m-%d %H:%M") }}</span>
                               </p>
                             </div>
                             <p class="small mb-0">
-                              child commment
+                              {{ child_comment.comment_text }}
                             </p>
                           </div>
                         </div>
                       </div>
 
                       {% endfor %}
+                      {% endif %}
                   
                     </div>
                     

@@ -31,7 +31,11 @@ class Comment_Repository:
         return new_comment
 
     def create_child_comment(self, comment_text, post_id, user_id, parent_comment_id):
-        # TODO create a new User in the DB
+        # TODO create a new child comment in the DB
+
+        new_comment = Comment(comment_text = comment_text, post_id= post_id, user_id = user_id, parent_comment_id = parent_comment_id)
+        db.session.add(new_comment)
+        db.session.commit()
 
         return None
 
