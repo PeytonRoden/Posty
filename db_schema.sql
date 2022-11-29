@@ -9,7 +9,8 @@ CREATE TABLE User_ (
     user_password VARCHAR(255) NOT NULL,
     university VARCHAR(255) NOT NULL,
 	account_created TIMESTAMP NOT NULL,
-	admin_ Bool NOT NULL,
+	admin_ BOOLEAN NOT NULL,
+    authenticated BOOLEAN NOT NULL,
     PRIMARY KEY (user_id),
 	UNIQUE (username),
 	UNIQUE (email)

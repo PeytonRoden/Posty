@@ -1,10 +1,13 @@
 from flask import Flask, render_template, request, url_for, redirect, flash
+from werkzeug.security import generate_password_hash, check_password_hash
+from flask_login import login_user,login_required, logout_user
 
 
 from src.repositories.Post_Repository import post_repository_singleton
 from src.repositories.User_Repository import user_repository_singleton
 from src.repositories.Comment_Repository import comment_repository_singleton
 from src.models.models import Post
+from src.models.models import User_
 
 from src.models.models import db
 
@@ -19,14 +22,24 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db.init_app(app)
 
 
+
+
 global post_list
 post_list = post_repository_singleton.get_all_posts()
 
 #login stuff
+"""
 global logged_in 
 logged_in = False
 global current_user
 current_user = None
+"""
+
+#new loggin stuff
+from flask_login import LoginManager
+from flask_login import current_user
+login_manager = LoginManager()
+login_manager.init_app(app)
 
 
 @app.route('/') # Python decorator, new syntax
@@ -61,8 +74,10 @@ def create_new_post_page():
     return render_template("create_new_post.html", current_user = current_user)
 
 
-@app.post('/create_new_user')  # Python decorator, new syntax
-def create_new_user():
+
+"""
+@app.post('/sign_up')  # Python decorator, new syntax
+def sign_up():
 
     firstname = request.form.get('firstname')
     lastname = request.form.get('lastname')
@@ -83,10 +98,91 @@ def create_new_user():
     flash('Form Submitted Successfully')
 
     return redirect("/login_page")
+"""
+
+@app.post('/sign_up')  # Python decorator, new syntax
+def sign_up():
+    # code to validate and add user to database goes here
+    firstname = request.form.get('firstname')
+    lastname = request.form.get('lastname')
+    username = request.form.get('username')
+    user_university = request.form.get('university')
+    user_email = request.form.get('email')
+    user_password = request.form.get('password')
+    user_repeat_password = request.form.get('repeat_password')
+
+    #if passwords don't match redirect
+    if (user_password != user_repeat_password):
+        # TODO: handle this
+        flash('Password Does Not Match')
+        return redirect("/sign_up_page")
+
+    user = User_.query.filter_by(email=user_email).first() # if this returns a user, then the email already exists in database
+
+    if user: # if a user is found, we want to redirect back to signup page so user can try again
+        flash('Email address already exists')
+        return redirect("/sign_up_page")
+
+
+    # create a new user with the form data. Hash the password so the plaintext version isn't saved.
+    user_repository_singleton.create_user(firstname, lastname, username, user_email, generate_password_hash(user_password, method='sha256'), user_university)
+
+    flash('Form Submitted Successfully')
+
+    return redirect("/login_page")
+
+
+"""
+@login_manager.user_loader
+def user_loader(user_id):
+    ///Given *user_id*, return the associated User object.
+    ///
+    ///:param unicode user_id: user_id (email) user to retrieve
+    ///
+    ///
+    return User_.query.get(user_id)
+"""
+
+@login_manager.user_loader
+def load_user(user_id):
+    # since the user_id is just the primary key of our user table, use it in the query for the user
+    return User_.query.get(int(user_id))
 
 
 
-@app.post('/login_page/login') # Python decorator, new syntax
+@app.post('/login') # Python decorator, new syntax
+def login():
+    # login code goes here
+    username = request.form.get('username')
+    password = request.form.get('password')
+
+    user = User_.query.filter_by(username=username).first()
+
+    # check if the user actually exists
+    # take the user-supplied password, hash it, and compare it to the hashed password in the database
+    if not user or not check_password_hash(user.user_password, password):
+        flash('Please check your login details and try again.')
+        #if password details don't match reload the page
+        return redirect("/login_page")
+
+    # if the above check passes, then we know the user has the right credentials
+    login_user(user)
+
+    print("logged in :"+ current_user.username)
+
+    # if the above check passes, then we know the user has the right credentials
+    return redirect("/")
+
+
+@app.post('/logout')
+@login_required
+def logout():
+    logout_user()
+    return redirect("/")
+
+
+"""
+@app.post('/login') # Python decorator, new syntax
 def login():
     global logged_in
     global current_user
@@ -108,33 +204,29 @@ def login():
         print("passwrods don't match")
         return redirect("/login_page")
 
-    print(logged_in)
     if current_user == None:
         print("No current user")
-    else:
-        print(current_user.name)
 
     #at this point user exists and password matches
     logged_in = True
     current_user = user
 
-    print(logged_in)
-    print(current_user.username)
 
     #go back to index, name and uni will appear at top of screen
     return redirect("/")
-
+"""
 
 
 
 @app.post('/create_new_post') # Python decorator, new syntax
+@login_required
 def create_new_post():
     global post_list
 
     title = request.form.get('title')
     post_text = request.form.get('post')
 
-    if(current_user != None):
+    if(current_user.is_authenticated):
 
         post_repository_singleton.create_post(current_user.university, title, post_text, current_user.user_id)
         #update post list
@@ -145,15 +237,15 @@ def create_new_post():
     return redirect("/")
 
 
-
-@app.post('/account_info/logout') # Python decorator, new syntax
+"""
+@app.post('/logout') # Python decorator, new syntax
 def logout():
     global current_user
 
     current_user = None
 
     return redirect("/")
-
+"""
 
 @app.route('/post_viewer/<int:post_id>')
 def post_viewer(post_id):
@@ -196,6 +288,7 @@ def post_viewer(post_id):
 
 
 @app.route('/comment_text_area/<int:post_id>')
+@login_required
 def post_viewer_comment_text_area(post_id):
 
     #get post object using id
@@ -205,7 +298,7 @@ def post_viewer_comment_text_area(post_id):
     comment_dictionary = generate_comment_dictionary(post_id)
 
     #can't comment if not logged in
-    if(not logged_in):
+    if(not current_user.is_authenticated):
         #if the comments list is empty display the page
         if(len(comment_dictionary) == 0):
             return render_template("post_viewer.html", current_user = current_user, post = user_post, comment_dictionary = {}, parent_comment=False)
@@ -220,13 +313,14 @@ def post_viewer_comment_text_area(post_id):
     
 
 @app.route('/comment_text_area/comment/<int:post_id>')
+@login_required
 def post_viewer_comment(post_id):
 
     comment_dictionary = generate_comment_dictionary(post_id)
     user_post = post_repository_singleton.get_post_by_id(post_id)
 
     #can't comment if not logged in
-    if(not logged_in):
+    if(not current_user.is_authenticated):
         #if the comments list is empty display the page
         if(len(comment_dictionary) == 0):
             return render_template("post_viewer.html", current_user = current_user, post = user_post, comment_dictionary = {}, parent_comment=False)
@@ -251,6 +345,7 @@ def post_viewer_comment(post_id):
 
 
 @app.route('/comment_text_area/<int:post_id>/<int:comment_id>')
+@login_required
 def post_viewer_reply_to_comment(post_id, comment_id):
 
     #get post object using id
@@ -261,7 +356,7 @@ def post_viewer_reply_to_comment(post_id, comment_id):
     comment_dictionary = generate_comment_dictionary(post_id)
 
     #can't comment if not logged in
-    if(not logged_in):
+    if(not current_user.is_authenticated):
         #if the comments list is empty display the page
         if(len(comment_dictionary) == 0):
             return render_template("post_viewer.html", current_user = current_user, post = user_post, comment_dictionary = {}, parent_comment=False)
@@ -277,6 +372,7 @@ def post_viewer_reply_to_comment(post_id, comment_id):
 
 
 @app.route('/comment_text_area/comment/<int:post_id>/<int:comment_id>')
+@login_required
 def post_viewer_comment_to_comment(post_id, comment_id):
 
     comment_dictionary = generate_comment_dictionary(post_id)
@@ -286,7 +382,7 @@ def post_viewer_comment_to_comment(post_id, comment_id):
 
 
     #can't comment if not logged in
-    if(not logged_in):
+    if(not current_user.is_authenticated):
         #if the comments list is empty display the page
         if(len(comment_dictionary) == 0):
             return render_template("post_viewer.html", current_user = current_user, post = user_post, comment_dictionary = {}, parent_comment=False)
