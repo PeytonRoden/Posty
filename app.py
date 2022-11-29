@@ -11,12 +11,12 @@ from src.models.models import User_
 
 from src.models.models import db
 
-app = Flask(__name__) # __name__ refers to the module name
+app = Flask(__name__)  # __name__ refers to the module name
 app.secret_key = 'super secret key'
 app.config['SESSION_TYPE'] = 'filesystem'
 app.app_context().push()
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:password@localhost:5432/posty_database'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:0605@localhost:5432/posty_database'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db.init_app(app)
@@ -27,8 +27,9 @@ db.init_app(app)
 global post_list
 post_list = post_repository_singleton.get_all_posts()
 
+
+
 #login stuff
-"""
 global logged_in 
 logged_in = False
 global current_user
@@ -42,36 +43,40 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 
 
-@app.route('/') # Python decorator, new syntax
+@app.route('/')  # Python decorator, new syntax
 def index():
     post_list = post_repository_singleton.get_all_posts()
-    return render_template("index.html", current_user = current_user, post_list= post_list)
+    return render_template("index.html", current_user=current_user, post_list=post_list)
 
-@app.route('/login_page') # Python decorator, new syntax
+
+@app.route('/login_page')  # Python decorator, new syntax
 def login_page():
-    return render_template("login_page.html", current_user = current_user)
+    return render_template("login_page.html", current_user=current_user)
 
-@app.route('/home_page') # Python decorator, new syntax
+
+@app.route('/home_page')  # Python decorator, new syntax
 def home_page():
-    return render_template("index.html", current_user = current_user, post_list= post_list)
+    return render_template("index.html", current_user=current_user, post_list=post_list)
 
-@app.route('/sign_up_page') # Python decorator, new syntax
+
+@app.route('/sign_up_page')  # Python decorator, new syntax
 def sign_up_page():
-    return render_template("sign_up_page.html", current_user = current_user)
+    return render_template("sign_up_page.html", current_user=current_user)
 
-@app.route('/account_info_page') # Python decorator, new syntax
+
+@app.route('/account_info_page')  # Python decorator, new syntax
 def account_info_page():
-    return render_template("account_info.html", current_user = current_user)
+    return render_template("account_info.html", current_user=current_user)
 
 
-@app.route('/create_new_post_page') # Python decorator, new syntax
+@app.route('/create_new_post_page')  # Python decorator, new syntax
 def create_new_post_page():
 
-    if(current_user == None):
-        #need to be logged in to make posts
+    if (current_user == None):
+        # need to be logged in to make posts
         return redirect("/")
 
-    return render_template("create_new_post.html", current_user = current_user)
+    return render_template("create_new_post.html", current_user=current_user)
 
 
 
@@ -127,12 +132,15 @@ def sign_up():
     # create a new user with the form data. Hash the password so the plaintext version isn't saved.
     user_repository_singleton.create_user(firstname, lastname, username, user_email, generate_password_hash(user_password, method='sha256'), user_university)
 
+
+@app.post('/login_page/login')  # Python decorator, new syntax
+
     flash('Form Submitted Successfully')
 
     return redirect("/login_page")
 
 
-"""
+
 @login_manager.user_loader
 def user_loader(user_id):
     ///Given *user_id*, return the associated User object.
@@ -141,7 +149,7 @@ def user_loader(user_id):
     ///
     ///
     return User_.query.get(user_id)
-"""
+
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -181,64 +189,74 @@ def logout():
     return redirect("/")
 
 
-"""
+
 @app.post('/login') # Python decorator, new syntax
+
 def login():
     global logged_in
     global current_user
 
-
     username = request.form.get('username')
     user_password = request.form.get('password')
 
-
     user = user_repository_singleton.get_user_by_username(username)
 
-    if(user == None):
-        #user doesn't exist
+    if (user == None):
+        # user doesn't exist
         print("user  === none")
+        flash('User Not Found')
         return redirect("/login_page")
 
-    if(user.user_password != user_password):
-        #passwords don't match
-        print("passwrods don't match")
+    if (user.user_password != user_password):
+        # passwords don't match
+        print("passwords don't match")
+        flash('Wrong Password')
         return redirect("/login_page")
 
     if current_user == None:
         print("No current user")
 
-    #at this point user exists and password matches
+    # at this point user exists and password matches
     logged_in = True
     current_user = user
 
 
-    #go back to index, name and uni will appear at top of screen
+    # go back to index, name and uni will appear at top of screen
     return redirect("/")
-"""
+
+
+
+@app.post('/create_new_post')  # Python decorator, new syntax
 
 
 
 @app.post('/create_new_post') # Python decorator, new syntax
 @login_required
+
 def create_new_post():
     global post_list
 
     title = request.form.get('title')
     post_text = request.form.get('post')
 
+    if (current_user != None):
+
     if(current_user.is_authenticated):
 
-        post_repository_singleton.create_post(current_user.university, title, post_text, current_user.user_id)
-        #update post list
+        post_repository_singleton.create_post(
+            current_user.university, title, post_text, current_user.user_id)
+        # update post list
         post_list = post_repository_singleton.get_all_posts()
-
-
 
     return redirect("/")
 
 
-"""
+
+@app.post('/account_info/logout')  # Python decorator, new syntax
+
+
 @app.post('/logout') # Python decorator, new syntax
+
 def logout():
     global current_user
 
@@ -253,49 +271,50 @@ def post_viewer(post_id):
 
     selected_post_id = post_id
 
-    #grabbing posts using post ids
+    # grabbing posts using post ids
     user_post = None
-    
+
     for post in post_list:
-        if(str(selected_post_id ) == str(post.post_id)):
+        if (str(selected_post_id) == str(post.post_id)):
             user_post = post
 
-
-    if(user_post == None):
+    if (user_post == None):
         return redirect("/")
 
-
-
-    #need to find list of all comments associated with this particular post and pass that into render tempate
-    comments = post_repository_singleton.returnAllComments(selected_post_id )
+    # need to find list of all comments associated with this particular post and pass that into render tempate
+    comments = post_repository_singleton.returnAllComments(selected_post_id)
     print(comments)
 
+    # if the comments list is empty display the page
+    if (len(comments) == 0):
+        return render_template("post_viewer.html", current_user=current_user, post=user_post, comment_dictionary={})
 
-    #if the comments list is empty display the page
-    if(len(comments) == 0):
-        return render_template("post_viewer.html", current_user = current_user, post = user_post, comment_dictionary = {})
-
-
-
-    #organize comments list into a dictionary where
+    # organize comments list into a dictionary where
     # {  parents comment: [child comment 1, child comment 2, child comment 3]   }
 
     comment_dictionary = generate_comment_dictionary(post_id)
 
     print(comment_dictionary)
 
-    return render_template("post_viewer.html", current_user = current_user, post = user_post, comment_dictionary = comment_dictionary, parent_comment= False)
+    return render_template("post_viewer.html", current_user=current_user, post=user_post, comment_dictionary=comment_dictionary, parent_comment=False)
 
 
 @app.route('/comment_text_area/<int:post_id>')
 @login_required
 def post_viewer_comment_text_area(post_id):
 
-    #get post object using id
+    # get post object using id
     user_post = post_repository_singleton.get_post_by_id(post_id)
 
-    #get comment dictionary
+    # get comment dictionary
     comment_dictionary = generate_comment_dictionary(post_id)
+
+
+    # can't comment if not logged in
+    if (not logged_in):
+        # if the comments list is empty display the page
+        if (len(comment_dictionary) == 0):
+            return render_template("post_viewer.html", current_user=current_user, post=user_post, comment_dictionary={}, parent_comment=False)
 
     #can't comment if not logged in
     if(not current_user.is_authenticated):
@@ -303,14 +322,15 @@ def post_viewer_comment_text_area(post_id):
         if(len(comment_dictionary) == 0):
             return render_template("post_viewer.html", current_user = current_user, post = user_post, comment_dictionary = {}, parent_comment=False)
 
-        return render_template("post_viewer.html", current_user = current_user, post = user_post, comment_dictionary = comment_dictionary, parent_comment= False)
 
-    #if the comments list is empty display the page
-    if(len(comment_dictionary) == 0):
-        return render_template("post_viewer.html", current_user = current_user, post = user_post, comment_dictionary = {}, parent_comment=True)
+        return render_template("post_viewer.html", current_user=current_user, post=user_post, comment_dictionary=comment_dictionary, parent_comment=False)
 
-    return render_template("post_viewer.html", current_user = current_user, post = user_post, comment_dictionary = comment_dictionary, parent_comment= True)
-    
+    # if the comments list is empty display the page
+    if (len(comment_dictionary) == 0):
+        return render_template("post_viewer.html", current_user=current_user, post=user_post, comment_dictionary={}, parent_comment=True)
+
+    return render_template("post_viewer.html", current_user=current_user, post=user_post, comment_dictionary=comment_dictionary, parent_comment=True)
+
 
 @app.route('/comment_text_area/comment/<int:post_id>')
 @login_required
@@ -319,6 +339,13 @@ def post_viewer_comment(post_id):
     comment_dictionary = generate_comment_dictionary(post_id)
     user_post = post_repository_singleton.get_post_by_id(post_id)
 
+
+    # can't comment if not logged in
+    if (not logged_in):
+        # if the comments list is empty display the page
+        if (len(comment_dictionary) == 0):
+            return render_template("post_viewer.html", current_user=current_user, post=user_post, comment_dictionary={}, parent_comment=False)
+
     #can't comment if not logged in
     if(not current_user.is_authenticated):
         #if the comments list is empty display the page
@@ -328,32 +355,39 @@ def post_viewer_comment(post_id):
         return render_template("post_viewer.html", current_user = current_user, post = user_post, comment_dictionary = comment_dictionary, parent_comment= False)
 
 
+        return render_template("post_viewer.html", current_user=current_user, post=user_post, comment_dictionary=comment_dictionary, parent_comment=False)
+
     comment_text = request.args.get('comment_text')
 
-    comment_repository_singleton.create_parent_comment(comment_text, post_id , current_user.user_id)
+    comment_repository_singleton.create_parent_comment(
+        comment_text, post_id, current_user.user_id)
     comment_dictionary = generate_comment_dictionary(post_id)
 
-    #if the comments list is empty display the page
-    if(len(comment_dictionary) == 0):
-        return render_template("post_viewer.html", current_user = current_user, post = user_post, comment_dictionary = {}, parent_comment=False)
+    # if the comments list is empty display the page
+    if (len(comment_dictionary) == 0):
+        return render_template("post_viewer.html", current_user=current_user, post=user_post, comment_dictionary={}, parent_comment=False)
 
-    return render_template("post_viewer.html", current_user = current_user, post = user_post, comment_dictionary = comment_dictionary, parent_comment= False)
-    
-
-
-
+    return render_template("post_viewer.html", current_user=current_user, post=user_post, comment_dictionary=comment_dictionary, parent_comment=False)
 
 
 @app.route('/comment_text_area/<int:post_id>/<int:comment_id>')
 @login_required
 def post_viewer_reply_to_comment(post_id, comment_id):
 
-    #get post object using id
+    # get post object using id
     user_post = post_repository_singleton.get_post_by_id(post_id)
-    comment_to_reply = comment_repository_singleton.get_comment_by_id(comment_id)
+    comment_to_reply = comment_repository_singleton.get_comment_by_id(
+        comment_id)
 
-    #get comment dictionary
+    # get comment dictionary
     comment_dictionary = generate_comment_dictionary(post_id)
+
+
+    # can't comment if not logged in
+    if (not logged_in):
+        # if the comments list is empty display the page
+        if (len(comment_dictionary) == 0):
+            return render_template("post_viewer.html", current_user=current_user, post=user_post, comment_dictionary={}, parent_comment=False)
 
     #can't comment if not logged in
     if(not current_user.is_authenticated):
@@ -361,14 +395,14 @@ def post_viewer_reply_to_comment(post_id, comment_id):
         if(len(comment_dictionary) == 0):
             return render_template("post_viewer.html", current_user = current_user, post = user_post, comment_dictionary = {}, parent_comment=False)
 
-        return render_template("post_viewer.html", current_user = current_user, post = user_post, comment_dictionary = comment_dictionary, parent_comment= False)
 
-    #if the comments list is empty display the page
-    if(len(comment_dictionary) == 0):
-        return render_template("post_viewer.html", current_user = current_user, post = user_post, comment_dictionary = {}, parent_comment=False)
+        return render_template("post_viewer.html", current_user=current_user, post=user_post, comment_dictionary=comment_dictionary, parent_comment=False)
 
-    return render_template("post_viewer.html", current_user = current_user, post = user_post, comment_dictionary = comment_dictionary, parent_comment= False, comment_to_reply = comment_to_reply)
-    
+    # if the comments list is empty display the page
+    if (len(comment_dictionary) == 0):
+        return render_template("post_viewer.html", current_user=current_user, post=user_post, comment_dictionary={}, parent_comment=False)
+
+    return render_template("post_viewer.html", current_user=current_user, post=user_post, comment_dictionary=comment_dictionary, parent_comment=False, comment_to_reply=comment_to_reply)
 
 
 @app.route('/comment_text_area/comment/<int:post_id>/<int:comment_id>')
@@ -378,6 +412,10 @@ def post_viewer_comment_to_comment(post_id, comment_id):
     comment_dictionary = generate_comment_dictionary(post_id)
     print(comment_dictionary)
     user_post = post_repository_singleton.get_post_by_id(post_id)
+
+    comment_to_reply = comment_repository_singleton.get_comment_by_id(
+        comment_id)
+
     comment_to_reply = comment_repository_singleton.get_comment_by_id(comment_id)
 
 
@@ -390,38 +428,43 @@ def post_viewer_comment_to_comment(post_id, comment_id):
         return render_template("post_viewer.html", current_user = current_user, post = user_post, comment_dictionary = comment_dictionary, parent_comment= False)
 
 
+    # can't comment if not logged in
+    if (not logged_in):
+        # if the comments list is empty display the page
+        if (len(comment_dictionary) == 0):
+            return render_template("post_viewer.html", current_user=current_user, post=user_post, comment_dictionary={}, parent_comment=False)
+
+        return render_template("post_viewer.html", current_user=current_user, post=user_post, comment_dictionary=comment_dictionary, parent_comment=False)
 
     comment_text = request.args.get('comment_text')
-    comment_repository_singleton.create_child_comment(comment_text, post_id , current_user.user_id, comment_id)
+    comment_repository_singleton.create_child_comment(
+        comment_text, post_id, current_user.user_id, comment_id)
     comment_dictionary = generate_comment_dictionary(post_id)
 
+    # if the comments list is empty display the page
+    if (len(comment_dictionary) == 0):
+        return render_template("post_viewer.html", current_user=current_user, post=user_post, comment_dictionary={}, parent_comment=False)
 
-    #if the comments list is empty display the page
-    if(len(comment_dictionary) == 0):
-        return render_template("post_viewer.html", current_user = current_user, post = user_post, comment_dictionary = {}, parent_comment=False)
-
-    return render_template("post_viewer.html", current_user = current_user, post = user_post, comment_dictionary = comment_dictionary, parent_comment= False)
-    
-
-
+    return render_template("post_viewer.html", current_user=current_user, post=user_post, comment_dictionary=comment_dictionary, parent_comment=False)
 
 
 def generate_comment_dictionary(selected_post_id):
-    #organize comments list into a dictionary where
+    # organize comments list into a dictionary where
     # {  parents comment: [child comment 1, child comment 2, child comment 3]   }
 
-    comments = post_repository_singleton.returnAllComments(selected_post_id )
+    comments = post_repository_singleton.returnAllComments(selected_post_id)
 
     comment_dictionary = {}
 
-    #parent comments
+    # parent comments
     for comment in comments:
         if comment.parent_comment_id == None:
             comment_dictionary[comment] = []
 
-    #child comments
+    # child comments
     for comment in comments:
         if comment.parent_comment_id != None:
-            comment_dictionary[comment_repository_singleton.get_comment_by_id(comment.parent_comment_id)].append(comment)
+            comment_dictionary[comment_repository_singleton.get_comment_by_id(
+                comment.parent_comment_id)].append(comment)
 
     return comment_dictionary
