@@ -27,7 +27,7 @@ def get_uni_repository():
         def create_uni(self, name: str, logo: str, subpage: str) -> Uni:
             """Create a new user and return it"""
             # Create the user instance
-            user = Uni(name, logo, subpage)
+            uni = Uni(name, logo, subpage)
             # Save the instance in our in-memory database
             self._db.append(uni)
             # Return the user instance
