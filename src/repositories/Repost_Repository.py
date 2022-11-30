@@ -21,7 +21,7 @@ class Repost_Repository:
 
         return Repost.query.get(post_id)
 
-    def create_repost(self, title, director, rating):
+    def create_repost(self, reposter_user_id, post_id, poster_user_id):
         # TODO create a new repost in the DB
         #new_repost= Repost( )
         # db.session.add(new_repost)
