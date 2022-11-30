@@ -2,6 +2,7 @@ from src.models.models import db
 from src.models.models import Post
 from src.models.models import Comment
 
+
 class Post_Repository:
 
     def get_all_posts(self):
@@ -14,21 +15,21 @@ class Post_Repository:
 
     def create_post(self, university, post_title, post_text, user_id):
 
-        new_post = Post(university = university, post_title = post_title, post_text = post_text, user_id=user_id)
+        new_post = Post(university=university, post_title=post_title,
+                        post_text=post_text, user_id=user_id)
         db.session.add(new_post)
         db.session.commit()
 
         return new_post
 
-    def search_posts(self, title):
+    def search_posts(self, post_title):
         # TODO get all Users matching case insensitive substring (SQL LIKE, use google for how to do with SQLAlchemy)
-        return None
-
+        return Post.query.filter_by(post_title=post_title).first()
 
     def returnAllComments(self, post_id):
-        #TODO return all comments assoicated witht that post ID
+        # TODO return all comments assoicated witht that post ID
 
-        comments = Comment.query.filter_by(post_id = post_id).all()
+        comments = Comment.query.filter_by(post_id=post_id).all()
 
         return comments
 
