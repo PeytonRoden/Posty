@@ -23,7 +23,6 @@ db.init_app(app)
 
 
 
-
 global post_list
 post_list = post_repository_singleton.get_all_posts()
 
@@ -425,3 +424,9 @@ def generate_comment_dictionary(selected_post_id):
             comment_dictionary[comment_repository_singleton.get_comment_by_id(comment.parent_comment_id)].append(comment)
 
     return comment_dictionary
+
+
+@app.route('/delete_comment/<int:comment_id>')
+@login_required
+def post_viewer_comment(comment_id):
+    pass
