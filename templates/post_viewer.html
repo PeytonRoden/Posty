@@ -53,10 +53,14 @@
               </p>
   
               <div class="small d-flex justify-content-start">
-                <a href="#!" class="d-flex align-items-center me-3">
+                <a href="/like/{{ post.post_id }}" class="d-flex align-items-center me-3">
                   <i class="far fa-thumbs-up me-2"></i>
-                  <p class="mb-0">Like</p>
+                  <p class="mb-0">Like </p>
                 </a>
+
+                  <p class = "mb-0"> {{ post.number_likes }}  ayo</p> 
+
+                
                 <a href="/comment_text_area/{{ post.post_id }}" class="d-flex align-items-center me-3">
                   <i class="far fa-comment-dots me-2"></i>
                   <p class="mb-0">Comment</p>
@@ -67,6 +71,30 @@
                 </a>
               </div>
             </div>
+
+
+            {% if current_user.is_authenticated %}
+            {% if current_user.user_id == post.user_id %}
+
+            <div class="small d-flex justify-content-start">
+              <div class="dropdown-container"   class="d-flex align-items-center me-3" tabindex="-1">
+                      <div class="three-dots" ></div>
+                      <div class="dropdown" >
+                        <a href="/delete_post_post_viewer/{{ post.post_id }}">
+                          <div>delete</div>
+                        </a>
+                        <a href="#">
+                          <div>edit</div>
+                        </a>
+                      </div>
+              </div>
+            </div>
+
+            {% endif %}
+            {% endif %}
+
+
+
             {% if parent_comment %}
             <div class="card-footer py-3 border-0" style="background-color: #f8f9fa;">
               <div class="d-flex flex-start w-100">
@@ -131,6 +159,30 @@
                         <p class="small mb-0">
                           {{ parent_comment.comment_text }}
                         </p>
+
+
+                        {% if current_user.is_authenticated %}
+                        {% if current_user.user_id == post.user_id %}
+                        <!--peepeepooopoo-->
+
+                        <div class="small d-flex justify-content-start">
+                          <div class="dropdown-container"   class="d-flex align-items-center me-3" tabindex="-1">
+                                  <div class="three-dots" ></div>
+                                  <div class="dropdown" >
+                                    <a href="/delete_comment/{{ post.post_id }}/{{ parent_comment.comment_id }}">
+                                      <div>delete</div>
+                                    </a>
+                                    <a href="#">
+                                      <div>edit</div>
+                                    </a>
+                                  </div>
+                          </div>
+                        </div>
+
+                        {% endif %}
+                        {% endif %}
+
+
                       </div>
 
 
@@ -191,6 +243,29 @@
                             <p class="small mb-0">
                               {{ child_comment.comment_text }}
                             </p>
+
+
+                            {% if current_user.is_authenticated %}
+                            {% if current_user.user_id == post.user_id %}
+                            <!--peepeepooopoo-->
+    
+                            <div class="small d-flex justify-content-start">
+                              <div class="dropdown-container"   class="d-flex align-items-center me-3" tabindex="-1">
+                                      <div class="three-dots" ></div>
+                                      <div class="dropdown" >
+                                        <a href="/delete_comment/{{ post.post_id }}/{{ child_comment.comment_id }}">
+                                          <div>delete</div>
+                                        </a>
+                                        <a href="#">
+                                          <div>edit</div>
+                                        </a>
+                                      </div>
+                              </div>
+                            </div>
+    
+                            {% endif %}
+                            {% endif %}
+
                           </div>
                         </div>
                       </div>

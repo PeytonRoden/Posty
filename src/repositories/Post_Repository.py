@@ -1,6 +1,7 @@
 from src.models.models import db
 from src.models.models import Post
 from src.models.models import Comment
+from src.models.models import Like_
 
 
 class Post_Repository:
@@ -32,6 +33,36 @@ class Post_Repository:
         comments = Comment.query.filter_by(post_id=post_id).all()
 
         return comments
+
+
+    def delete_post(self, post_id):
+
+        comments = Comment.query.filter_by(post_id=post_id).all()
+
+        #delete all comments associated with post
+        for comment in comments:
+            db.session.delete(comment)
+
+        #delete all likes asscoiated with the post
+        likes = Like_.query.filter_by(post_id=post_id).all()
+
+        for like in likes:
+            db.session.delete(like)
+
+
+        post = Post.query.get(post_id)
+        db.session.delete(post)
+        db.session.commit()
+
+    def increment_num_likes(self, post_id):
+        post = Post.query.get(post_id)
+        post.number_likes += 1
+        db.session.commit()
+
+    def decrement_num_likes(self, post_id):
+        post = Post.query.get(post_id)
+        post.number_likes -=1
+        db.session.commit()
 
 
 # Singleton to be used in other modules

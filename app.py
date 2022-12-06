@@ -6,6 +6,7 @@ from flask_login import login_user,login_required, logout_user
 from src.repositories.Post_Repository import post_repository_singleton
 from src.repositories.User_Repository import user_repository_singleton
 from src.repositories.Comment_Repository import comment_repository_singleton
+from src.repositories.Like_Repository import like_repository_singleton
 from src.models.models import Post
 from src.models.models import User_
 
@@ -41,8 +42,15 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 
 
+
+
 @app.route('/') # Python decorator, new syntax
 def index():
+    post_list = post_repository_singleton.get_all_posts()
+    return render_template("index.html", current_user = current_user, post_list= post_list)
+
+@app.route('/index') # Python decorator, new syntax
+def go_to_index():
     post_list = post_repository_singleton.get_all_posts()
     return render_template("index.html", current_user = current_user, post_list= post_list)
 
@@ -52,6 +60,7 @@ def login_page():
 
 @app.route('/home_page') # Python decorator, new syntax
 def home_page():
+    post_list = post_repository_singleton.get_all_posts()
     return render_template("index.html", current_user = current_user, post_list= post_list)
 
 @app.route('/sign_up_page') # Python decorator, new syntax
@@ -68,7 +77,7 @@ def create_new_post_page():
 
     if(current_user == None):
         #need to be logged in to make posts
-        return redirect("/")
+        return index()
 
     return render_template("create_new_post.html", current_user = current_user)
 
@@ -114,13 +123,13 @@ def sign_up():
     if (user_password != user_repeat_password):
         # TODO: handle this
         flash('Password Does Not Match')
-        return redirect("/sign_up_page")
+        return sign_up_page()
 
     user = User_.query.filter_by(email=user_email).first() # if this returns a user, then the email already exists in database
 
     if user: # if a user is found, we want to redirect back to signup page so user can try again
         flash('Email address already exists')
-        return redirect("/sign_up_page")
+        return sign_up_page()
 
 
     # create a new user with the form data. Hash the password so the plaintext version isn't saved.
@@ -128,7 +137,7 @@ def sign_up():
 
     flash('Form Submitted Successfully')
 
-    return redirect("/login_page")
+    return login_page()
 
 
 """
@@ -162,7 +171,7 @@ def login():
     if not user or not check_password_hash(user.user_password, password):
         flash('Please check your login details and try again.')
         #if password details don't match reload the page
-        return redirect("/login_page")
+        return login_page()
 
     # if the above check passes, then we know the user has the right credentials
     login_user(user)
@@ -170,14 +179,14 @@ def login():
     print("logged in :"+ current_user.username)
 
     # if the above check passes, then we know the user has the right credentials
-    return redirect("/")
+    return index()
 
 
 @app.post('/logout')
 @login_required
 def logout():
     logout_user()
-    return redirect("/")
+    return index()
 
 
 """
@@ -233,7 +242,7 @@ def create_new_post():
 
 
 
-    return redirect("/")
+    return index()
 
 
 """
@@ -259,9 +268,11 @@ def post_viewer(post_id):
         if(str(selected_post_id ) == str(post.post_id)):
             user_post = post
 
+    user_post = post_repository_singleton.get_post_by_id(post_id)
+
 
     if(user_post == None):
-        return redirect("/")
+        return index()
 
 
 
@@ -406,6 +417,8 @@ def post_viewer_comment_to_comment(post_id, comment_id):
 
 
 def generate_comment_dictionary(selected_post_id):
+
+    
     #organize comments list into a dictionary where
     # {  parents comment: [child comment 1, child comment 2, child comment 3]   }
 
@@ -421,12 +434,68 @@ def generate_comment_dictionary(selected_post_id):
     #child comments
     for comment in comments:
         if comment.parent_comment_id != None:
-            comment_dictionary[comment_repository_singleton.get_comment_by_id(comment.parent_comment_id)].append(comment)
+
+            try:
+                comment_dictionary[comment_repository_singleton.get_comment_by_id(comment.parent_comment_id)].append(comment)
+            except:
+                print("hi")
 
     return comment_dictionary
 
 
-@app.route('/delete_comment/<int:comment_id>')
+@app.route('/delete_comment/<int:post_id>/<int:comment_id>')
 @login_required
-def post_viewer_comment(comment_id):
-    pass
+def delete_comment(comment_id,post_id):
+
+    comment_repository_singleton.delete_comment(comment_id)
+
+    return redirect(url_for('post_viewer', post_id = post_id))
+
+
+
+@app.route('/delete_post_index/<int:post_id>')
+@login_required
+def delete_post_index(post_id):
+    post_repository_singleton.delete_post(post_id)
+    return redirect(url_for('go_to_index'))
+
+
+@app.route('/delete_post_post_viewer/<int:post_id>')
+@login_required
+def delete_post_post_viewer(post_id):
+    
+    post_repository_singleton.delete_post(post_id)
+
+    return redirect(url_for('go_to_index'))
+
+
+
+@app.route('/like/<int:post_id>')
+@login_required
+def like(post_id):
+
+    #creating like and incrementing number of likes on post
+    like_created = like_repository_singleton.create_like(post_id, current_user.user_id )
+
+    if(like_created):
+        post_repository_singleton.increment_num_likes(post_id)
+    else:
+        post_repository_singleton.decrement_num_likes(post_id)
+
+    return redirect(url_for('post_viewer', post_id = post_id))
+
+
+@app.route('/index_like/<int:post_id>')
+@login_required
+def index_like(post_id):
+
+    #creating like and incrementing number of likes on post
+    like_created = like_repository_singleton.create_like(post_id, current_user.user_id )
+
+    if(like_created):
+        post_repository_singleton.increment_num_likes(post_id)
+    else:
+        post_repository_singleton.decrement_num_likes(post_id)
+
+
+    return redirect(url_for('go_to_index'))
