@@ -83,6 +83,8 @@ class Like_(db.Model):
     #serial field that automatically increments
     like_id = db.Column(db.Integer, primary_key=True)
 
+
+
     post_id = db.Column(db.Integer, db.ForeignKey(Post.post_id), nullable=False)
     post = db.relationship('Post', backref='post_likes', lazy=True , primaryjoin="Post.post_id == Like_.post_id")
     user_id = db.Column(db.Integer, db.ForeignKey(User_.user_id), nullable=False)

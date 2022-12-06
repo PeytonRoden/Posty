@@ -47,10 +47,25 @@ class Comment_Repository:
         return Comment.query.filter_by(comment_text=comment_text).first()
 
 
+    def get_children_comments(self, comment_id):
+        comments = Comment.query.filter_by(parent_comment_id = Comment.query.get(comment_id).parent_comment_id).all()
+        return comments
+    
+
     def delete_comment(self, comment_id):
+        
         comment = Comment.query.get(comment_id)
+
+        #if it has children comments delete those
+        if comment.parent_comment_id == None:
+            children_comments = self.get_children_comments(comment_id)
+            
+            for child_comment in children_comments:
+                db.session.delete(child_comment)
+
         db.session.delete(comment)
         db.session.commit()
+
 
 
 
