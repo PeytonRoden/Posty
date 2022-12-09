@@ -20,8 +20,10 @@ class User_(UserMixin, db.Model):
     admin_ = db.Column(db.Boolean, default = False, nullable = False)
 
 
+
     authenticated = db.Column(db.Boolean, default=False)
 
+    avatar_url = db.Column(db.String(255), nullable = False, default = "default_avatar.jpg")
     def is_active(self):
         """True, as all users are active."""
         return True
@@ -54,6 +56,8 @@ class Post(db.Model):
     number_likes = db.Column(db.Integer, nullable = False, default = 0 )
     number_comments = db.Column(db.Integer, nullable = False, default = 0 )
     number_reposts = db.Column(db.Integer, nullable = False, default = 0 )
+
+
 
     user_id = db.Column(db.Integer, db.ForeignKey(User_.user_id), nullable=False)
     user = db.relationship('User_', backref='posts', lazy=False, primaryjoin="User_.user_id == Post.user_id")

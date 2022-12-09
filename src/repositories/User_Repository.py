@@ -28,6 +28,12 @@ class User_Repository:
         # TODO get all Users matching case insensitive substring (SQL LIKE, use google for how to do with SQLAlchemy)
         return None
 
+    def set_profile_pic(self, user_id, profile_pic_url):
+        user = self.get_user_by_id(user_id)
+        user.avatar_url = profile_pic_url
+        db.session.commit()
+
+
 
 # Singleton to be used in other modules
 user_repository_singleton = User_Repository()

@@ -48,7 +48,7 @@ class Comment_Repository:
 
 
     def get_children_comments(self, comment_id):
-        comments = Comment.query.filter_by(parent_comment_id = Comment.query.get(comment_id).parent_comment_id).all()
+        comments = Comment.query.filter_by(parent_comment_id = comment_id).all()
         return comments
     
 

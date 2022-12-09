@@ -1,6 +1,8 @@
 from flask import Flask, render_template, request, url_for, redirect, flash
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import login_user,login_required, logout_user
+import os
+from PIL import Image
 
 
 from src.repositories.Post_Repository import post_repository_singleton
@@ -499,3 +501,67 @@ def index_like(post_id):
 
 
     return redirect(url_for('go_to_index'))
+
+
+
+
+UPLOAD_FOLDER = './static/images/profiles'
+ALLOWED_EXTENSIONS = set(['txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'])
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+def extension(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() 
+
+#uploading pfp
+@app.route('/uploads/pp/', methods = ['GET', 'POST'])
+@login_required
+def upload_photo():
+ 
+
+    if request.method == 'POST' and 'photo' in request.files:
+
+
+        # check if the post request has the file part
+        if 'photo' not in request.files:
+            flash('No file part')
+            return redirect(request.url)
+        file = request.files['photo']
+        # if user does not select file, browser also
+        # submit a empty part without filename
+        if file.filename == '':
+            flash('No selected file')
+            return redirect(request.url)
+        if file and allowed_file(file.filename):
+
+            #assign the member unique id as the file name for our uploaded image
+            #we are also getting some URLs to the image we will use in our profile.html file
+            profilepic_name = str(current_user.username)+"."+extension(file.filename)
+            profilepic_url = 'images/profiles/'+profilepic_name
+            workingdir = os.path.abspath(os.getcwd())
+            fullprofilepic_url = workingdir + profilepic_url
+
+            #if filename already exists delete it
+            if os.path.isfile(fullprofilepic_url) == True:
+                os.remove(fullprofilepic_url)
+
+
+            file.save(os.path.join(app.config['UPLOAD_FOLDER'] , profilepic_name))
+
+            flash("Success! Profile photo uploaded successfully.", 'success')
+
+            #save the image url on database for futire use
+            user_repository_singleton.set_profile_pic(current_user.user_id, profilepic_url)
+            return redirect(url_for('go_to_index'))
+
+    return redirect(url_for('go_to_index'))
+
+            
+
+
+        

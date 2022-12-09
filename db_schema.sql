@@ -11,6 +11,7 @@ CREATE TABLE User_ (
 	account_created TIMESTAMP NOT NULL,
 	admin_ BOOLEAN NOT NULL,
     authenticated BOOLEAN NOT NULL,
+    avatar_url VARCHAR(255) NOT NULL,
     PRIMARY KEY (user_id),
 	UNIQUE (username),
 	UNIQUE (email)
