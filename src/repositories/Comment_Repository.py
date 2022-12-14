@@ -50,6 +50,11 @@ class Comment_Repository:
         comments = Comment.query.filter_by(parent_comment_id=comment_id).all()
         return comments
 
+    def edit_comment(self, comment_id, new_text):
+        comment = Comment.query.get(comment_id)
+        comment.comment_text = new_text
+        db.session.commit()
+
     def delete_comment(self, comment_id):
 
         comment = Comment.query.get(comment_id)

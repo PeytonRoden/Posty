@@ -46,13 +46,20 @@ login_manager.init_app(app)
 @app.route('/')  # Python decorator, new syntax
 def index():
     post_list = post_repository_singleton.get_all_posts()
-    return render_template("index.html", current_user=current_user, post_list=post_list)
+
+    post_list = sorted(post_list, key = lambda post: post.number_likes)
+    post_list.reverse()
+    return render_template("index.html", current_user = current_user, post_list= post_list)
 
 
 @app.route('/index')  # Python decorator, new syntax
 def go_to_index():
     post_list = post_repository_singleton.get_all_posts()
-    return render_template("index.html", current_user=current_user, post_list=post_list)
+
+    post_list = sorted(post_list, key = lambda post: post.number_likes)
+    post_list.reverse()
+    return render_template("index.html", current_user = current_user, post_list= post_list)
+
 
 
 @app.route('/login_page')  # Python decorator, new syntax
@@ -63,7 +70,12 @@ def login_page():
 @app.route('/home_page')  # Python decorator, new syntax
 def home_page():
     post_list = post_repository_singleton.get_all_posts()
-    return render_template("index.html", current_user=current_user, post_list=post_list)
+
+    post_list = sorted(post_list, key = lambda post: post.number_likes)
+    post_list.reverse()
+    print(post_list)
+    return render_template("index.html", current_user = current_user, post_list= post_list)
+
 
 
 @app.route('/sign_up_page')  # Python decorator, new syntax
@@ -145,16 +157,7 @@ def sign_up():
     return login_page()
 
 
-"""
-@login_manager.user_loader
-def user_loader(user_id):
-    ///Given *user_id*, return the associated User object.
-    ///
-    ///:param unicode user_id: user_id (email) user to retrieve
-    ///
-    ///
-    return User_.query.get(user_id)
-"""
+
 
 
 @login_manager.user_loader
@@ -200,40 +203,6 @@ def logout():
     return index()
 
 
-"""
-@app.post('/login') # Python decorator, new syntax
-def login():
-    global logged_in
-    global current_user
-
-
-    username = request.form.get('username')
-    user_password = request.form.get('password')
-
-
-    user = user_repository_singleton.get_user_by_username(username)
-
-    if(user == None):
-        #user doesn't exist
-        print("user  === none")
-        return redirect("/login_page")
-
-    if(user.user_password != user_password):
-        #passwords don't match
-        print("passwrods don't match")
-        return redirect("/login_page")
-
-    if current_user == None:
-        print("No current user")
-
-    #at this point user exists and password matches
-    logged_in = True
-    current_user = user
-
-
-    #go back to index, name and uni will appear at top of screen
-    return redirect("/")
-"""
 
 
 @app.post('/create_new_post')  # Python decorator, new syntax
@@ -271,6 +240,9 @@ def logout():
 """
 
 
+
+#view single post with its ocmments
+
 @app.route('/post_viewer/<int:post_id>')
 def post_viewer(post_id):
     global post_list
@@ -307,6 +279,8 @@ def post_viewer(post_id):
     return render_template("post_viewer.html", current_user=current_user, post=user_post, comment_dictionary=comment_dictionary, parent_comment=False)
 
 
+
+#pop up a text box to add comment
 @app.route('/comment_text_area/<int:post_id>')
 @login_required
 def post_viewer_comment_text_area(post_id):
@@ -332,6 +306,48 @@ def post_viewer_comment_text_area(post_id):
     return render_template("post_viewer.html", current_user=current_user, post=user_post, comment_dictionary=comment_dictionary, parent_comment=True)
 
 
+
+#pop up a text box to edit parent ocmmment
+@app.route('/edit_parent_comment_text_area/<int:post_id>/<int:comment_id>')
+@login_required
+def post_viewer_parent_comment_edit_text_area(post_id,comment_id):
+
+    #get post object using id
+    user_post = post_repository_singleton.get_post_by_id(post_id)
+    comment = comment_repository_singleton.get_comment_by_id(comment_id)
+
+    #get comment dictionary
+    comment_dictionary = generate_comment_dictionary(post_id)
+
+    del comment_dictionary[comment]
+
+    #can't comment if not logged in
+    if(not current_user.is_authenticated):
+        #if the comments list is empty display the page
+        if(len(comment_dictionary) == 0):
+            return render_template("post_viewer.html", current_user = current_user, post = user_post, comment_dictionary = {}, parent_comment=False)
+
+        return render_template("post_viewer.html", current_user = current_user, post = user_post, comment_dictionary = comment_dictionary, parent_comment= False)
+
+    #if the comments list is empty display the page
+    if(len(comment_dictionary) == 0):
+        return render_template("post_viewer.html", current_user = current_user, post = user_post, comment_dictionary = {}, parent_comment_edit=True, comment_to_edit = comment)
+
+    return render_template("post_viewer.html", current_user = current_user, post = user_post, comment_dictionary = comment_dictionary, parent_comment_edit= True, comment_to_edit = comment)
+    
+
+
+#edit parent comment
+@app.route('/edit_parent_comment/<int:post_id>/<int:comment_id>')
+@login_required
+def post_viewer_parent_comment_edit(post_id,comment_id):
+    comment_text = request.args.get('comment_text')
+    comment_repository_singleton.edit_comment(comment_id,comment_text)
+    return post_viewer(post_id)
+
+
+
+#post commment
 @app.route('/comment_text_area/comment/<int:post_id>')
 @login_required
 def post_viewer_comment(post_id):
@@ -359,7 +375,7 @@ def post_viewer_comment(post_id):
 
     return render_template("post_viewer.html", current_user=current_user, post=user_post, comment_dictionary=comment_dictionary, parent_comment=False)
 
-
+#pop up text area to add child comment
 @app.route('/comment_text_area/<int:post_id>/<int:comment_id>')
 @login_required
 def post_viewer_reply_to_comment(post_id, comment_id):
@@ -384,9 +400,12 @@ def post_viewer_reply_to_comment(post_id, comment_id):
     if (len(comment_dictionary) == 0):
         return render_template("post_viewer.html", current_user=current_user, post=user_post, comment_dictionary={}, parent_comment=False)
 
-    return render_template("post_viewer.html", current_user=current_user, post=user_post, comment_dictionary=comment_dictionary, parent_comment=False, comment_to_reply=comment_to_reply)
+
+    return render_template("post_viewer.html", current_user = current_user, post = user_post, comment_dictionary = comment_dictionary, parent_comment= False, comment_to_reply = comment_to_reply, comment_reply_bool = True)
+    
 
 
+#post child comment
 @app.route('/comment_text_area/comment/<int:post_id>/<int:comment_id>')
 @login_required
 def post_viewer_comment_to_comment(post_id, comment_id):
@@ -410,11 +429,48 @@ def post_viewer_comment_to_comment(post_id, comment_id):
         comment_text, post_id, current_user.user_id, comment_id)
     comment_dictionary = generate_comment_dictionary(post_id)
 
-    # if the comments list is empty display the page
-    if (len(comment_dictionary) == 0):
-        return render_template("post_viewer.html", current_user=current_user, post=user_post, comment_dictionary={}, parent_comment=False)
 
-    return render_template("post_viewer.html", current_user=current_user, post=user_post, comment_dictionary=comment_dictionary, parent_comment=False)
+    """
+    #if the comments list is empty display the page
+    if(len(comment_dictionary) == 0):
+        return render_template("post_viewer.html", current_user = current_user, post = user_post, comment_dictionary = {}, parent_comment=False)
+
+    return render_template("post_viewer.html", current_user = current_user, post = user_post, comment_dictionary = comment_dictionary, parent_comment= False)
+    """
+    return post_viewer(post_id)
+
+
+#pop up a text box to edit child comment
+@app.route('/edit_child_comment_text_area/<int:post_id>/<int:parent_comment_id>/<int:comment_id>')
+@login_required
+def post_viewer_child_comment_edit_text_area(post_id, parent_comment_id, comment_id):
+
+    #get post object using id
+    user_post = post_repository_singleton.get_post_by_id(post_id)
+    comment = comment_repository_singleton.get_comment_by_id(comment_id)
+    parentcomment = comment_repository_singleton.get_comment_by_id(parent_comment_id)
+    comment_to_reply = comment_repository_singleton.get_comment_by_id(parent_comment_id)
+
+    #get comment dictionary
+    comment_dictionary = generate_comment_dictionary(post_id)
+
+    comment_dictionary[parentcomment].remove(comment)
+
+    #can't comment if not logged in
+    if(not current_user.is_authenticated):
+        #if the comments list is empty display the page
+        if(len(comment_dictionary) == 0):
+            return render_template("post_viewer.html", current_user = current_user, post = user_post, comment_dictionary = {}, parent_comment=False)
+
+        return render_template("post_viewer.html", current_user = current_user, post = user_post, comment_dictionary = comment_dictionary, parent_comment= False)
+
+    #if the comments list is empty display the page
+    if(len(comment_dictionary) == 0):
+        return render_template("post_viewer.html", current_user = current_user, post = user_post, comment_dictionary = {}, child_comment_edit=True, comment_to_edit = comment)
+
+    return render_template("post_viewer.html", current_user = current_user, post = user_post, comment_dictionary = comment_dictionary, child_comment_edit= True, comment_to_edit = comment, comment_to_reply = comment_to_reply)
+    
+
 
 
 def generate_comment_dictionary(selected_post_id):
@@ -559,3 +615,53 @@ def upload_photo():
             return redirect(url_for('go_to_index'))
 
     return redirect(url_for('go_to_index'))
+
+
+@app.post('/edit_profile')
+@login_required
+def edit_profile():
+    firstname = request.form.get('firstname')
+    lastname = request.form.get('lastname')
+    username = request.form.get('username')
+    user_university = request.form.get('university')
+    user_email = request.form.get('email')
+
+    user_repository_singleton.edit_user(current_user.user_id, firstname, lastname, username, user_email, user_university)
+
+
+    return redirect(url_for('account_info_page'))
+
+@app.post('/change_password')
+@login_required
+def change_password():
+    curr_password = request.form.get('current_password')
+    new_password = request.form.get('new_password')
+    repeat_new_password = request.form.get('repeat_new_password')
+
+    print(curr_password)
+    print(new_password)
+    print(repeat_new_password)
+
+    if not check_password_hash(current_user.user_password, curr_password):
+        flash('incorresct password')
+        #if password details don't match reload the page
+        redirect(url_for('account_info_page'))
+
+    #if passwords don't match redirect
+    if (new_password != repeat_new_password):
+        # TODO: handle this
+        flash('new password Does Not Match')
+        return redirect(url_for('account_info_page'))
+
+    user_repository_singleton.change_password(current_user.user_id, generate_password_hash(new_password, method='sha256'))
+    flash('password successfully changed')
+    return redirect(url_for('account_info_page'))
+
+
+@app.post('/delete_account')
+@login_required
+def delete_account():
+    user_repository_singleton.delete_user(current_user.user_id)
+    logout_user()
+    return redirect(url_for('go_to_index'))
+
