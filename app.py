@@ -97,32 +97,13 @@ def create_new_post_page():
 
     return render_template("create_new_post.html", current_user=current_user)
 
-
 """
-@app.post('/sign_up')  # Python decorator, new syntax
-def sign_up():
-
-    firstname = request.form.get('firstname')
-    lastname = request.form.get('lastname')
-    username = request.form.get('username')
-    user_university = request.form.get('university')
-    user_email = request.form.get('email')
-    user_password = request.form.get('password')
-    user_repeat_password = request.form.get('repeat_password')
-
-    if (user_password != user_repeat_password):
-        # TODO: handle this
-        flash('Password Does Not Match')
-        return redirect("/sign_up_page")
-
-    user_repository_singleton.create_user(
-        firstname, lastname, username, user_email, user_password, user_university)
-
-    flash('Form Submitted Successfully')
-
-    return redirect("/login_page")
+@login_manager.unauthorized_handler
+def unauthorized():
+    # do stuff
+    flash("must be logged in to do that")
+    return redirect(url_for('login_page'))
 """
-
 
 @app.post('/sign_up')  # Python decorator, new syntax
 def sign_up():
@@ -169,15 +150,17 @@ def load_user(user_id):
 @app.post('/login')  # Python decorator, new syntax
 def login():
 
-    # login code goes here
-    session["user"] = user
-    if "user" in session:
-        return index()
 
     username = request.form.get('username')
     password = request.form.get('password')
 
     user = User_.query.filter_by(username=username).first()
+    
+
+    # login code goes here
+    session["username"] = user.username
+
+
 
     # check if the user actually exists
     # take the user-supplied password, hash it, and compare it to the hashed password in the database
@@ -208,8 +191,8 @@ def logout():
 @app.post('/create_new_post')  # Python decorator, new syntax
 @login_required
 def create_new_post():
-    if "user" in session:
-        user = session["user"]
+    if "username" in session:
+        user = session["username"]
 
         global post_list
 
@@ -223,11 +206,29 @@ def create_new_post():
             # update post list
             post_list = post_repository_singleton.get_all_posts()
 
-        return index()
+        return redirect(url_for('go_to_index'))
 
     else:
-        return login_page()
+        return redirect(url_for('login_page'))
 
+
+@app.route('/edit_post_page/<int:post_id>')  # Python decorator, new syntax
+@login_required
+def edit_post_page(post_id):
+    user_post = post_repository_singleton.get_post_by_id(post_id)
+    return render_template("edit_post.html", post = user_post)
+
+@app.post('/edit_post/<int:post_id>')  # Python decorator, new syntax
+@login_required
+def edit_post(post_id):
+    user_post = post_repository_singleton.get_post_by_id(post_id)
+
+    title = request.form.get('title')
+    post_text = request.form.get('post')
+    post_repository_singleton.edit_post(post_id,title,post_text)
+
+    return redirect(url_for("post_viewer", post_id=post_id))
+    return render_template("edit_post.html", post = user_post)
 
 """
 @app.post('/logout') # Python decorator, new syntax
@@ -369,11 +370,14 @@ def post_viewer_comment(post_id):
         comment_text, post_id, current_user.user_id)
     comment_dictionary = generate_comment_dictionary(post_id)
 
+    return post_viewer(post_id)
+    """
     # if the comments list is empty display the page
     if (len(comment_dictionary) == 0):
         return render_template("post_viewer.html", current_user=current_user, post=user_post, comment_dictionary={}, parent_comment=False)
 
     return render_template("post_viewer.html", current_user=current_user, post=user_post, comment_dictionary=comment_dictionary, parent_comment=False)
+    """
 
 #pop up text area to add child comment
 @app.route('/comment_text_area/<int:post_id>/<int:comment_id>')

@@ -42,9 +42,9 @@
               <div class="card-body">
 
 
-                <div style="transform: rotate(0) !important;">
+                <div>
 
-                  <div class="d-flex flex-start align-items-center" style="transform: rotate(0) !important;">
+                  <div class="d-flex flex-start align-items-center"style="transform: rotate(0) !important;" >
 
                     <a href="post_viewer/{{ post.post_id }}" class="stretched-link"></a>
 
@@ -72,54 +72,50 @@
                     </p>
 
                   </div>
+                  
 
 
-              <div class="card-body" style="transform: rotate(0) !important;">
+              <div class="card-body" >
                   <div class="small d-flex justify-content-start">
 
                     <p class="mb-0"> {{ post.number_likes }}</p>
-                    <a href="/index_like/{{ post.post_id }}" class="d-flex align-items-center me-3">
+                    <a style = "z-index: 2; position: relative;" href="/index_like/{{ post.post_id }}" class="d-flex align-items-center me-3">
                       <img src="{{ url_for('static', filename='like_button.png') }}" alt="like" width="25"
                         height="25" />
                     </a>
 
 
                     <p class="mb-0"> {{ post.number_comments }}</p>
-                    <a href="/comment_text_area/{{ post.post_id }}"  class="d-flex align-items-center me-3">
+                    <a style = "z-index: 2; position: relative;" href="/comment_text_area/{{ post.post_id }}"  class="d-flex align-items-center me-3">
                       <img src="{{ url_for('static', filename='comment_button.png') }}" alt="like" width="25"
                         height="25" />
                     </a>
 
-                    {% if current_user.is_authenticated %}
-                    {% if current_user.user_id == post.user_id %}
-  
-                    <div>
-                      <div class="dropdown-container" tabindex="-1">
-                        <div class="three-dots"></div>
-                        <div class="dropdown">
-                          <a href="delete_post_index/{{ post.post_id }}">
-                            <div>delete</div>
-                          </a>
-                          <a href="#">
-                            <div>edit</div>
-                          </a>
-                        </div>
+                      
+                  {% if current_user.is_authenticated %}
+                  {% if current_user.user_id == post.user_id %}
+    
+                  <div class="small d-flex justify-content-start" style = "z-index: 2; position: relative;">
+                    <div class="dropdown-container" class="d-flex align-items-center me-3" tabindex="-1">
+                      <div class="three-dots"></div>
+                      <div class="dropdown">
+                        <a href="delete_post_index/{{ post.post_id }}">
+                          <div>delete</div>
+                        </a>
+                        <a href="edit_post_page/{{ post.post_id }}">
+                          <div>edit</div>
+                        </a>
                       </div>
                     </div>
-  
-                    {% endif %}
-                    {% endif %}
+                  </div>
+    
+                  {% endif %}
+                  {% endif %}
 
 
                   </div>
 
-
-                 
-
-
-
-                
-            
+                    
                 </div>
 
             </div>

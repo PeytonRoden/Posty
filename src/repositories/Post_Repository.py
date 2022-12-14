@@ -65,5 +65,12 @@ class Post_Repository:
         db.session.commit()
 
 
+    def edit_post(self, post_id, post_title, post_text):
+        post = self.get_post_by_id(post_id)
+        post.post_title = post_title
+        post.post_text = post_text
+        db.session.commit()
+
+
 # Singleton to be used in other modules
 post_repository_singleton = Post_Repository()
