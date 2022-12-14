@@ -23,10 +23,11 @@ class Repost_Repository:
 
     def create_repost(self, reposter_user_id, post_id, poster_user_id):
         # TODO create a new repost in the DB
-        #new_repost= Repost( )
-        # db.session.add(new_repost)
-        # db.session.commit()
-        return None  # new_repost
+        new_repost = Repost(reposter_user_id=reposter_user_id,
+                            post_id=post_id, poster_user_id=poster_user_id)
+        db.session.add(new_repost)
+        db.session.commit()
+        return new_repost
 
 
 # Singleton to be used in other modules
