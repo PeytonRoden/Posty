@@ -21,7 +21,8 @@ app.secret_key = 'super secret key'
 app.config['SESSION_TYPE'] = 'filesystem'
 app.app_context().push()
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:password@localhost:5432/posty_database'
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', default = 'postgresql://postgres:password@localhost:5432/posty_database')
+#app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:password@localhost:5432/posty_database'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db.init_app(app)
@@ -97,13 +98,13 @@ def create_new_post_page():
 
     return render_template("create_new_post.html", current_user=current_user)
 
-"""
+
 @login_manager.unauthorized_handler
 def unauthorized():
     # do stuff
     flash("must be logged in to do that")
     return redirect(url_for('login_page'))
-"""
+
 
 @app.post('/sign_up')  # Python decorator, new syntax
 def sign_up():
@@ -228,7 +229,6 @@ def edit_post(post_id):
     post_repository_singleton.edit_post(post_id,title,post_text)
 
     return redirect(url_for("post_viewer", post_id=post_id))
-    return render_template("edit_post.html", post = user_post)
 
 """
 @app.post('/logout') # Python decorator, new syntax
@@ -344,7 +344,7 @@ def post_viewer_parent_comment_edit_text_area(post_id,comment_id):
 def post_viewer_parent_comment_edit(post_id,comment_id):
     comment_text = request.args.get('comment_text')
     comment_repository_singleton.edit_comment(comment_id,comment_text)
-    return post_viewer(post_id)
+    return redirect(url_for("post_viewer", post_id=post_id))
 
 
 
@@ -370,14 +370,8 @@ def post_viewer_comment(post_id):
         comment_text, post_id, current_user.user_id)
     comment_dictionary = generate_comment_dictionary(post_id)
 
-    return post_viewer(post_id)
-    """
-    # if the comments list is empty display the page
-    if (len(comment_dictionary) == 0):
-        return render_template("post_viewer.html", current_user=current_user, post=user_post, comment_dictionary={}, parent_comment=False)
+    return redirect(url_for("post_viewer", post_id=post_id))
 
-    return render_template("post_viewer.html", current_user=current_user, post=user_post, comment_dictionary=comment_dictionary, parent_comment=False)
-    """
 
 #pop up text area to add child comment
 @app.route('/comment_text_area/<int:post_id>/<int:comment_id>')
@@ -441,7 +435,7 @@ def post_viewer_comment_to_comment(post_id, comment_id):
 
     return render_template("post_viewer.html", current_user = current_user, post = user_post, comment_dictionary = comment_dictionary, parent_comment= False)
     """
-    return post_viewer(post_id)
+    return redirect(url_for("post_viewer", post_id=post_id))
 
 
 #pop up a text box to edit child comment
