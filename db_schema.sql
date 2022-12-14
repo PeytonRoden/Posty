@@ -73,6 +73,15 @@ CREATE TABLE LIKE_ (
         REFERENCES Post(post_id)
 );
 
+-- Create Uni table
+CREATE TABLE UNI (
+    
+    university_id SERIAL       NOT NULL,
+    acronym    VARCHAR(255) NOT NULL,
+    uni_name    VARCHAR(255) NOT NULL
+);
+
+
 
 -- Create Repost table
 CREATE TABLE Repost (
@@ -92,3 +101,12 @@ CREATE TABLE Repost (
     FOREIGN KEY (poster_user_id)
         REFERENCES User_(user_id)
 );
+
+
+
+Insert into UNI(acronym, uni_name)
+Values('UNCC', 'University of North Carolina at Charlotte');
+Insert into UNI(acronym, uni_name)
+Values('UNC', 'University of North Carolina at Chapel Hill');
+Insert into UNI(acronym, uni_name)
+Values('NCSU', 'North Carolina State University');

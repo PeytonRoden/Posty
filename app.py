@@ -11,6 +11,7 @@ from src.repositories.Post_Repository import post_repository_singleton
 from src.repositories.User_Repository import user_repository_singleton
 from src.repositories.Comment_Repository import comment_repository_singleton
 from src.repositories.Like_Repository import like_repository_singleton
+from src.repositories.Uni_repo import _uni_repo
 from src.models.models import Post
 from src.models.models import User_
 
@@ -30,6 +31,8 @@ db.init_app(app)
 
 global post_list
 post_list = post_repository_singleton.get_all_posts()
+global uni_list
+uni_list = _uni_repo.get_all_uni()
 
 # login stuff
 """
@@ -46,6 +49,7 @@ login_manager.init_app(app)
 
 @app.route('/')  # Python decorator, new syntax
 def index():
+    uni_list = _uni_repo.get_all_uni()
     post_list = post_repository_singleton.get_all_posts()
 
     post_list = sorted(post_list, key = lambda post: post.number_likes)
@@ -55,6 +59,7 @@ def index():
 
 @app.route('/index')  # Python decorator, new syntax
 def go_to_index():
+    uni_list = _uni_repo.get_all_uni()
     post_list = post_repository_singleton.get_all_posts()
 
     post_list = sorted(post_list, key = lambda post: post.number_likes)
@@ -70,6 +75,7 @@ def login_page():
 
 @app.route('/home_page')  # Python decorator, new syntax
 def home_page():
+    uni_list = _uni_repo.get_all_uni()
     post_list = post_repository_singleton.get_all_posts()
 
     post_list = sorted(post_list, key = lambda post: post.number_likes)
@@ -81,12 +87,13 @@ def home_page():
 
 @app.route('/sign_up_page')  # Python decorator, new syntax
 def sign_up_page():
-    return render_template("sign_up_page.html", current_user=current_user)
+    return render_template("sign_up_page.html", current_user=current_user, uni_list = uni_list)
 
 
 @app.route('/account_info_page')  # Python decorator, new syntax
 def account_info_page():
-    return render_template("account_info.html", current_user=current_user)
+    uni_list = _uni_repo.get_all_uni()
+    return render_template("account_info.html", current_user=current_user, uni_list = uni_list)
 
 
 @app.route('/create_new_post_page')  # Python decorator, new syntax
@@ -112,7 +119,7 @@ def sign_up():
     firstname = request.form.get('firstname')
     lastname = request.form.get('lastname')
     username = request.form.get('username')
-    user_university = request.form.get('university')
+    user_university = request.form.get('comp_select')
     user_email = request.form.get('email')
     user_password = request.form.get('password')
     user_repeat_password = request.form.get('repeat_password')
@@ -621,7 +628,7 @@ def edit_profile():
     firstname = request.form.get('firstname')
     lastname = request.form.get('lastname')
     username = request.form.get('username')
-    user_university = request.form.get('university')
+    user_university = request.form.get('comp_select')
     user_email = request.form.get('email')
 
     user_repository_singleton.edit_user(current_user.user_id, firstname, lastname, username, user_email, user_university)

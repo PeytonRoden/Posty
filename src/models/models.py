@@ -96,6 +96,14 @@ class Like_(db.Model):
 
 
 
+class Uni(db.Model):
+    """Holds university name, logo, link topage"""
+    """Add maybe a list of post IDs and comment ids"""
+    university_id = db.Column(db.Integer, primary_key=True)
+    acronym = db.Column(db.String(255), nullable = False)
+    uni_name = db.Column(db.String(255), nullable = False)
+
+
 
 class Repost(db.Model):
 

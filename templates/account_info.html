@@ -66,9 +66,13 @@
                 <div class="d-flex flex-row align-items-center mb-4">
                   <i class="fas fa-user fa-lg me-3 fa-fw"></i>
                   <div class="form-outline flex-fill mb-0">
-                    <input name="university" type="text" id="form3Example1c" class="form-control"
-                      value="{{ current_user.university }}" required />
-                    <label class="form-label" for="form3Example1c">Your University</label>
+                    <select class="form-select" id="floatingSelect" aria-label="Floating label select example"name="comp_select" required>
+                      <option selected disabled>university</option>
+                        {% for i in uni_list %}
+                        <option value="{{ i.acronym }}">{{ i.acronym }}</option>
+                        {% endfor %}
+                      </select>
+                      <label class="form-label" for="form3Example1c">Your University</label>
                   </div>
                 </div>
 
