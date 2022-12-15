@@ -167,8 +167,6 @@ def login():
     user = User_.query.filter_by(username=username).first()
     
 
-    # login code goes here
-    session["username"] = user.username
 
 
 
@@ -201,8 +199,7 @@ def logout():
 @app.post('/create_new_post')  # Python decorator, new syntax
 @login_required
 def create_new_post():
-    if "username" in session:
-        user = session["username"]
+
 
         global post_list
 
@@ -217,9 +214,6 @@ def create_new_post():
             post_list = post_repository_singleton.get_all_posts()
 
         return redirect(url_for('go_to_index'))
-
-    else:
-        return redirect(url_for('login_page'))
 
 
 @app.route('/edit_post_page/<int:post_id>')  # Python decorator, new syntax
@@ -631,6 +625,13 @@ def edit_profile():
     lastname = request.form.get('lastname')
     username = request.form.get('username')
     user_university = request.form.get('comp_select')
+
+    if user_university is None:
+
+        user_university = current_user.university
+
+    print(user_university)
+        
     user_email = request.form.get('email')
 
     user_repository_singleton.edit_user(current_user.user_id, firstname, lastname, username, user_email, user_university)
