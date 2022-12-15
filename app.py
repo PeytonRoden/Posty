@@ -17,6 +17,8 @@ from src.models.models import User_
 
 from src.models.models import db
 
+#comment
+
 app = Flask(__name__)  # __name__ refers to the module name
 app.secret_key = 'super secret key'
 app.config['SESSION_TYPE'] = 'filesystem'
