@@ -189,7 +189,7 @@ def login():
 @app.post('/logout')
 @login_required
 def logout():
-    session.pop("user", None)
+    #session.pop("user", None)
     logout_user()
     return index()
 
