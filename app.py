@@ -629,6 +629,9 @@ def edit_profile():
     lastname = request.form.get('lastname')
     username = request.form.get('username')
     user_university = request.form.get('comp_select')
+    if user_university is None:
+        user_university = current_user.university
+
     user_email = request.form.get('email')
 
     user_repository_singleton.edit_user(current_user.user_id, firstname, lastname, username, user_email, user_university)
@@ -670,3 +673,6 @@ def delete_account():
     logout_user()
     return redirect(url_for('go_to_index'))
 
+
+if __name__ == "__main__":
+    app.run(ssl_context='adhoc')
